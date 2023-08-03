@@ -114,9 +114,7 @@ app.use(passport.session());
 
 app.get('/login', (요청, 응답)=>{
     응답.render('login.ejs');
-})
-
-    
+})  
 
 app.post('/login', passport.authenticate('local',{
     failureRedirect : '/fail'
