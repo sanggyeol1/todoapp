@@ -1,0 +1,270 @@
+[
+    기본세팅
+express라이브러리 설치하기
+
+1. npm init 하고 생성된 package.json에 "main": "server.js"
+2. npm install express 하면 package.json에 
+"dependencies": {
+    "express": "^4.18.2"
+  } 
+적힌다. : 현재 사용하고있는 express의 버젼을 알려줌
+
+
+server.js생성
+const express = require('express');
+const app = express();
+
+app.listen(8080, function() {
+    console.log('listening on 8080')
+})
+복붙 : 서버를 express로 만들기위한, 서버 오픈하기 위한 기본세팅
+
+node server.js 하면 서버 뜸(수정사항 있으면 서버껐다가 다시켜야함)
+npm install -g nodemon 쓰면 자동으로 껐다가 켜짐
+
+powershell을 관리자 권한으로 실행, 
+1. executionpolicy
+2. set-executionpolicy unrestricted 치고 Y
+
+그럼 nodemon server.js 로 서버 키고 수정사항 저장만 하면 알아서 서버 껐다 켜줌
+]
+
+[
+    웹 개발시 API : 웹서버와 고객 간의 소통방법(어떻게 해야 서버와 소통을 할수 있을까)
+
+app.get('/write', (요청, 응답)=>{
+    응답.sendFile(__dirname + '/write.html')
+}) 그냥 이런것들이 API임
+
+이런것들을 어떻게 짤지에 대한 규율 등이 rest api이다.
+REST API : rest원칙에 의해서 api를 짜면 코드가 restful 해진다.
+
+
+REST원칙 6개
+1. uniform interface : 간결하고 일관적(재일중요)
+ - 하나의 자료는 하나의 url로
+ - url 하나를 알면 둘을 알수 있어야 함(url이름을 보고 유추가 가능해야 함)
+ - 요청과 응답은 정보가 충분히 들어있어야 함
+
+이름짓기 원칙 : 
+ - url을 명사로 작성 추천, 
+ - 하위문서를 나타낼땐/, 
+ - 파일확장자 (.html)쓰지 않기
+ - 자료 하나당 하나의 url
+
+2. client와 서버의 역할구분
+ - 브라우저는 요청만
+ - 서버는 응답만
+
+3. stateless
+ - 요청1과 요청2는 의존성이 없어야 함
+
+4. cacheable
+ - 서버에서 보내주는 정보들은 캐싱이 가능해야 함(브라우저가 알아서 잘해줌)
+
+5. layered system 안중요
+6. code on demand 안중요
+]
+
+
+
+[
+    GET요청:
+    간단함 그냥 /주소 로 get 요청 보내면 응답.send로 보내주면 됨
+
+    app.get('/pet', (요청, 응답)=>{
+    응답.send('펫용품')
+})
+
+app.get('/', (요청, 응답)=>{
+    응답.sendFile(__dirname + '/index.html')
+})
+
+app.get('/write', (요청, 응답)=>{
+    응답.sendFile(__dirname + '/write.html')
+})
+
+]
+
+
+
+[
+    POST요청
+
+app.post('/add', (요청, 응답)=>{
+    응답.send('전송완료')
+    console.log(요청.body.title)
+    db에 저장
+})
+
+유저에게서 /add경로로 post요청을 받았을 때 받은 내용은 '요청'에 있다.
+이 '요청'을 사용하기 위해서는 
+
+1. body-parser가 필요하다.
+설치 : 
+app.use(express.urlencoded({extended: true})) 서버 위에 적으면 끝
+
+2. form 데이터의 경우 input 들에 name 쓰기
+
+]
+
+
+
+
+[
+    mongodb altas : nosql
+
+    DB 접속하는 URL 찾아오기
+
+server.js에서 DB에 접속하려면 접속 방법을 알아야겠죠? 
+
+
+1. 메인화면 셋팅이 끝나면 CONNECT라는 작은 흰색 버튼 누르기
+2. 가운데 Connect Your Application 버튼 누르기
+3. Choose your driver version 에서 Node.js 선택되어있는지 잘 확인하기
+4. (2) 밑에 접속 URL(Connection String) 긴게 뜨면 복사해서 일단 메모장 같은 곳에 저장해놓기
+
+끝. 이거 접속 URL만 잘 써주시면 이제 Node.js로 돌아가는 파일에서 여러분 DB와 직접 통신이 가능
+
+
+
+Server.js에서 DB접속하려면 
+
+1. 터미널 켜서 npm install mongodb@3.6.4 를 입력해서 라이브러리를 설치
+
+2. server.js 에 
+const MongoClient = require('mongodb').MongoClient;
+3. 하단에
+ var db
+ MongoClient.connect('아까 챙겨온 접속URL', function(에러, client){
+  if (에러) return console.log(에러);
+  db = client.db('todoapp');
+  app.listen('8080', function(){
+    console.log('listening on 8080')
+  });
+})
+
+nodemon server.js했을때 터미널에 listening on 8080뜨면 db연결이 된 것임
+
+
+]
+
+
+[
+    db에 데이터 저장하는법
+
+database는 폴더, 그 안에 collection이라는 이름의 파일이 저장된형태이다. _id는 부여해야하는데 내가 안쓰면 임의로 하나 부여함
+app.post('/add', (요청, 응답)=>{
+    
+    db.collection('post').insertOne({
+        title : 요청.body.title,
+        data : 요청.body.date
+    },(에러, 결과)=>{
+        console.log('저장완료')
+    })
+
+})이러한 형태로db에 데이터 꽂아넣기 가능하다.
+
+
+EJS : 서버데이터 집어넣어서 html만드는 라이브러리
+npm install ejs후
+server.js 에  app.set('view engine', 'ejs');
+
+list.html을 list.ejs로 바꿀 수 있다. (성능은 같음)
+<%= %> 안에 데이터 넣으면 됨  {}와 같은듯
+
+app.get('/list', function(요청, 응답){
+    응답.render('list.ejs');
+    db.collection('post').find().toArray((에러, 결과)=>{
+        console.log(결과)
+    });
+}) 이런식으로 보내줄 수 있음
+위 코드의 뜻 : db에 post라는 collection에 저장된 모든 데이터를 꺼내주세요
+
+서버에서 html말고 ejs쓰려면 views 폴더에 ejs파일을 몰아넣어야 한다.
+]
+
+
+[
+    게시물마다 그 고유의 _id를 가져야 한다.
+    _id : 0
+    _id : 1
+    _id : 2
+    인 글들이 있는데 여기서 2를 삭제하고 또 다른 글을 발행했을 때 그 글은 _id가 2가 되면 안된다. 각 글마다 고유의 id를 부여해야 한다.
+    그러기 위해서는 db에 id만을 관리하는 collection을 생성하는 것이 좋다.
+
+]
+
+[
+    서버에서 요청 응답해주는 법
+    응답.status(200) : 요청 성공
+    응답.status(400) : 고객 잘못 요청 실패 
+    응답.status(500) : 서버 이상 요청 실패
+    응답.status(400).send({message : '성공했습니다.'}) : 고객 잘못 요청 실패
+
+
+    url에 마지막 1231349187249이런 숫자는 글 번호이다.
+]
+
+
+[
+    회원인증방법
+1. session-based
+    쿠키
+
+2. 로그인 시 사용자에게 json웹 토큰을 발행해줌(암호화된 문자열)
+그럼 사용자는 토큰을 쿠키나 로컬스토리지에 저장함
+
+그 후 마이페이지에 접속하면 헤더에 토큰을 넣어서 토큰이 유효하면 마이페이지를 가져다 줌
+유저의 로그인 상태를 저장하지 않기 때문에 rest api에 적합하다.
+
+3. open authentication(OAuth)
+ - 구글의 프로필 정보를 가져옴
+ - 단점 : 구글이 없어지면 난감함
+
+]
+
+[
+    세션기능
+    npm install passport passport-local express-session
+
+    후 서버에
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const session = require('express-session');
+
+app.use(session({secret : '비밀코드', resave : true, saveUninitialized: false}));
+app.use(passport.initialize());
+app.use(passport.session()); 
+
+
+로그인창 만들고 서버에 
+
+app.post('/login', passport.authenticate('local',{
+    failureRedirect : '/fail'
+}), (요청, 응답)=>{
+  응답.redirect('/')
+})
+
+
+
+passport.use(new LocalStrategy({
+    usernameField: 'id',
+    passwordField: 'pw',
+    session: true,
+    passReqToCallback: false,
+  }, function (입력한아이디, 입력한비번, done) {
+    //console.log(입력한아이디, 입력한비번);
+    db.collection('login').findOne({ id: 입력한아이디 }, function (에러, 결과) {
+      if (에러) return done(에러)
+  
+      if (!결과) return done(null, false, { message: '존재하지않는 아이디요' })
+      if (입력한비번 == 결과.pw) {
+        return done(null, 결과)
+      } else {
+        return done(null, false, { message: '비번틀렸어요' })
+      }
+    })
+  }));
+
+]
