@@ -4,14 +4,15 @@ app.use(express.urlencoded({extended: true}))
 const MongoClient = require('mongodb').MongoClient;
 app.set('view engine', 'ejs');
 app.use('/public', express.static('public'))
+require('dotenv').config()
 
 var db;
-MongoClient.connect('mongodb+srv://sanggyeol1:xpflgks4201@cluster0.4pltbdt.mongodb.net/?retryWrites=true&w=majority', function(에러, client){
+MongoClient.connect(process.env.DB_URL, function(에러, client){
     if (에러) return console.log(에러);
     
     db = client.db('todoapp');
 
-    app.listen('8080', function(){
+    app.listen(process.env.PORT, function(){
       console.log('listening on 8080')
     });
   })
@@ -25,6 +26,8 @@ app.get('/', (요청, 응답)=>{
 app.get('/write', (요청, 응답)=>{
     응답.render('write.ejs');
 })
+
+
 
 
 
@@ -149,5 +152,24 @@ passport.use(new LocalStrategy({
   });//아이디를 이용해서 세션을 저장시키는 코드(로그인 성공시 발동)
   
   passport.deserializeUser(function (아이디, done) {
-    done(null, {})
+    db.collection('login').findOne({ id: 아이디 }, function (에러, 결과) {
+      done(null, 결과)
+    })
   }); //이 세션 데이터를 가진 사람을 db에서 찾아주세요(마이페이지 접속시 발동)
+
+
+
+  app.get('/mypage', 로그인했니,function (요청, 응답){
+    console.log(요청.user)
+    응답.render('mypage.ejs',{사용자 : 요청.user})
+  })
+ 
+function 로그인했니(요청, 응답, next){
+    if(요청.user){
+        next()
+    }else{
+        응답.send('로그인 안하셨는데요')
+    }
+}
+
+
