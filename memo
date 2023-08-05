@@ -326,3 +326,47 @@ https://cloud.google.com/appengine/docs/standard/nodejs/config/appref#environmen
 이런 곳을 참고해서 똑같이 환경변수를 제작하면 되겠습니다. 
 다만 변수만드는 문법에 등호 대신 콜론 (:)을 씁니다.
 ]
+
+
+
+[
+  검색기능 만들기
+
+일반적인 방법
+1. 검색버튼 누르면 서버에게 post요청
+2. 서버는 db에서 데이터를 꺼내줌
+하나찾을때 collection().findOne()
+많이찾을때 collection().find().toArray()
+그걸 ejs파일로 보내주면 될듯
+
+
+
+또다른 방법(query string)
+get요청으로 서버로 데이터 전달 가능(url에 넣어서)
+http://localhost:8080/list?데이터이름=데이터값
+
+window.location.replace('/url') 을 쓰면 현제페이지 url을 바꿀수 있다. 사실상 get요청이랑 동일하다.
+
+서버에서는 
+app.get('/search', (요청, 응답)=>{
+  console.log(요청.query)
+})으로 받아야 한다. 요청.query가 요청.body의 역할을 하는것
+
+중간본
+app.get('/search', (요청, 응답)=>{
+  console.log(요청.query)
+  db.collection('post').find({title : 요청.query.value}).toArray((에러, 결과)=>{
+    응답.render('list.ejs',{posts : 결과})
+  })
+})이러면 검색어와 완전히 일치하는 결과만 나온다.
+
+정규식 쓰면 해결(이 문자가 들어가있는지 검사하는것임) 근데 정규식을 쓰면 모든 데이터를 다 검색해야하기 때문에 너무 느려짐 그래서 indexing을 씀(binary search)
+
+index : 기존 collection을 정렬해놓은 사본
+index 만드는법 : 내가 원하는 collection을 찾아서 indexes를 찾아서 누르면 된다.
+ 
+index생성하고 fields에 "title": "text", 이런식으로 적으면 title이 가나다순으로 정렬되고 "_id" : 1, 이런식으로 하면 숫자순으로 indexing된다.
+여러가지 쓰면 여러가지 생성
+문자자료는 등록할때 한번에 등록해야 한다.(ex 제목과 작성자)
+
+]
