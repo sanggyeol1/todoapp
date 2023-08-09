@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const { ObjectId } = require('mongodb');
 app.use(express.urlencoded({extended: true}))
 const MongoClient = require('mongodb').MongoClient;
 app.set('view engine', 'ejs');
@@ -26,14 +27,6 @@ app.get('/', (요청, 응답)=>{
 app.get('/write', (요청, 응답)=>{
     응답.render('write.ejs');
 })
-
-
-
-
-
-
-
-
 
 
 
@@ -217,7 +210,6 @@ app.delete('/delete', function(요청, 응답){
     
   요청.body._id = parseInt(요청.body._id)
 
-    
       db.collection('post').deleteOne(요청.body, function(에러, 결과){
         console.log('삭제완료');
         응답.status(200).send({message : '성공했습니다.'})
@@ -274,3 +266,39 @@ app.post('/upload', upload.single("profile"), function(요청, 응답){
 app.get('/image/:imageName', (요청, 응답)=>{
   응답.sendFile( __dirname + '/public/image/' + 요청.params.imageName)
 })
+
+
+
+
+
+
+
+
+
+
+//채팅방기능
+
+app.post('/chatroom', 로그인했니, (req, res)=>{
+
+  var 저장할거 = {
+    title : '무슨무슨채팅방',
+    member : [ ObjectId(req.body.당한사람id), req.user._id ],
+    date : new Date(),
+  }
+
+  db.collection('chatroom').insertOne(저장할거).then((결과)=>{
+    console.log('채팅성공')
+  })
+})
+
+
+
+
+
+app.get('/chat',로그인했니 ,(req, res)=>{
+  
+  db.collection('chatroom').find({ member : req.user._id }).toArray().then((결과)=>{
+    res.render('chat.ejs',{data : 결과})
+  })
+})
+
