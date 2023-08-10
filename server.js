@@ -302,3 +302,38 @@ app.get('/chat',로그인했니 ,(req, res)=>{
   })
 })
 
+
+app.post('/message',로그인했니,(req, res)=>{
+  var 저장할거 ={
+    parent : req.body.parent,
+    content : req.body.content,
+    userid : req.user._id,
+    date : new Date()
+  }
+
+  db.collection('message').insertOne(저장할거).then(()=>{
+    console.log('저장완료')
+  }).catch(()=>{
+    console.log('저장실패')
+  })
+})
+
+
+
+app.get('/message/:id', 로그인했니, function(요청, 응답){
+
+  응답.writeHead(200, {
+    "Connection": "keep-alive",
+    "Content-Type": "text/event-stream",
+    "Cache-Control": "no-cache",
+  });
+
+
+  db.collection('message').find({ parent : "요청.params.id" }).toArray().then((결과)=>{
+    응답.write('event: test\n');
+    응답.write('data: '+ JSON.stringify(결과) +'\n\n');//안녕하세요라는 데이터를 test라는 이벤트명으로 보냄
+  })
+  
+
+});
+
