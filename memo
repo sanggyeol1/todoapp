@@ -574,4 +574,8 @@ app.get('/message/:parentid', 로그인했니, function(요청, 응답){
 서버 -> 유저 이렇게 전달되는 Header는 Response Header라고 합니다. 
 Header가 어떻게 생겼는지 보고싶으면 크롬 개발자도구 Network 탭가면 됩니다. 
 
+
+
+채팅기능에서 채팅을 쏘면 db에 저장은 되는데 프론트엔드 상으로 업데이트가 안됨 -> change Stream 설정을해놓으면 db변동시에 서버에 알려주고 서버가 유저에게 변동사항을 쏴줄 수 있음 
+
 ]
