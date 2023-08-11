@@ -329,10 +329,24 @@ app.get('/message/:id', 로그인했니, function(요청, 응답){
   });
 
 
-  db.collection('message').find({ parent : "요청.params.id" }).toArray().then((결과)=>{
+  db.collection('message').find({ parent : 요청.params.id }).toArray().then((결과)=>{
     응답.write('event: test\n');
     응답.write('data: '+ JSON.stringify(결과) +'\n\n');//안녕하세요라는 데이터를 test라는 이벤트명으로 보냄
   })
+
+
+
+  //changeStream
+  const 찾을문서 = [ // collection안의 원하는 document만 감시
+    { $match: { 'fullDocument.parent' : 요청.params.id } }
+];
+  
+const changeStream = db.collection('message').watch(찾을문서);//.watch()붙이면 실시간감시해줌
+
+changeStream.on('change', (result) => {
+  응답.write('event: test\n');
+  응답.write('data: ' + JSON.stringify([result.fullDocument]) +'\n\n')
+}); // 해당 컬렉션에 변동이 생기면 여기 코드가 실행
   
 
 });

@@ -55,9 +55,7 @@
            <div class="col-9 p-0">
              <div class="chat-room">
                 <ul class="list-group chat-content">
-                  <li><span class="chat-box">채팅방1 내용</span></li>
-                  <li><span class="chat-box">채팅방1 내용</span></li>
-                  <li><span class="chat-box mine">채팅방1 내용</span></li>
+                  
                 </ul>
               <div class="input-group">
                 <input class="form-control" id="chat-input">
@@ -77,11 +75,24 @@
 
         let 지금누른채팅방id
         var eventSource;
+         
         $('.list-group-item').click(function(){
           지금누른채팅방id = this.dataset.id
-          eventSource = new EventSource('/message'+지금누른채팅방id)
-          eventSource.addEventListener('test',(e)=>{
+
+          if(eventSource != undefined){
+            eventSource.close()//이미 채팅방이 열려있으면닫아줌
+          }
+          $('.chat-content').html('')
+
+          eventSource = new EventSource('/message/'+ 지금누른채팅방id)
+          eventSource.addEventListener('test',function(e){
             console.log(JSON.parse(e.data))//서버에서 보낸 데이터
+
+            var 가져온거 = JSON.parse(e.data)
+            가져온거.forEach(function(i){
+              $('.chat-content').append('<li><span class="chat-box">'+i.content+'</span></li>')
+            });
+            
           })
 
           console.log(지금누른채팅방id)
