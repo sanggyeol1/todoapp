@@ -1,0 +1,14 @@
+non-blocking : nodejs의 특성임. SJF와 비슷한 개념
+
+http://111.111.111.111:8080 이런식으로 ip주소와 포트번호를 입력하면 타 컴퓨터에서 내 컴퓨터로 접속이 가능.
+
+server.js 만들고 npm init -y
+npm install express로 express 다운
+nodemon 다운 : npm install -g nodemon
+
+
+restAPI
+1. 일관성있는 url이 좋다. , 하나의url+method는 하나의 데이터를 보내야 한다.
+2. 유저에게 서버 역할을 맏기지 마라
+3. 요청들은 서로 의존성이 없어야
+4. 요청은 캐싱이 가능해야 한다.
