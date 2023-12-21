@@ -185,6 +185,8 @@ app.post('/register',(요청, 응답)=>{
   
 })
 
+
+
 app.post('/add', (요청, 응답)=>{
   db.collection('counter').findOne({name : '게시물 갯수'},function(에러, 결과){
       var 총게시물갯수 = 결과.totalPost

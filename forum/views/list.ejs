@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href = '/main.css' rel="stylesheet">
+</head>
+<body class="grey-bg">
+
+    <%- include('nav.ejs') %>
+    
+    <div class="white-bg">
+
+        <% for(let i = 0; i < 글목록.length; i++){ %>
+            <div class="list-box">
+                <h4>
+                  <a href="/detail/<%= 글목록[i]._id %>">
+                    <%= 글목록[i].title %>
+                  </a>
+                  <a href="/edit/<%= 글목록[i]._id %>"> ✏️ </a>
+                  <span class="delete">🗑️</span>
+                </h4>
+                <p><%= 글목록[i].content %></p>
+                
+            </div>
+        <% } %>
+    </div>
+    
+    <script>
+       
+
+    //form 태그로 get post요청을 하면 새로고침이 됨
+    // -> ajax이용
+        
+    <% for(let i = 0; i < 글목록.length; i++){ %>
+    document.querySelectorAll('.delete')[<%= i %>].addEventListener('click', function(){
+        fetch('/abc', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ _id: '<%= 글목록[i]._id %>' })
+        })
+        .then(response => {
+            if(response.ok) {
+                return response.json();
+            } else {
+                throw new Error('Server response wasn\'t OK');
+            }
+        })
+        .then(data => {
+            console.log('Success:', data);
+            // 성공 시 수행할 작업
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            // 오류 발생 시 처리
+        });
+    });
+<% } %>
+  
+        
+
+    </script>
+    <!-- 서버로 데이터보내는 다른 방법 : 
+    1. <form>  2. ajax이용
+    3. query string(보안취약)  4. URL parmeter(보안취약) -->
+
+</body>
+</html>
