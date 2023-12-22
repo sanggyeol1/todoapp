@@ -88,6 +88,7 @@ app.put('/edit', async(요청, 응답)=>{//npm install method-override : 폼태�
         console.log(e)
     }
 })
+
 // 좋아요기능
 //$inc ->  누를때마다 +1
 // app.put('/edit', async(요청, 응답)=>{
@@ -105,16 +106,54 @@ app.put('/edit', async(요청, 응답)=>{//npm install method-override : 폼태�
 //$ne -> !=
 
 
-//삭제기능
-app.post('/abc', async(요청, 응답)=>{
-    await db.collection('post').deleteOne({ _id : new ObjectId(요청.body._id) })
-    // 프론트에서 삭제요청을 보내면
-    // _id 로 bd에서 관련 글을 찾아 삭제한다.
-    // 응답해준다.
+//글삭제기능
+app.delete('/delete', async(요청, 응답)=>{
+    try{
+        await db.collection('post').deleteOne({
+            _id : new ObjectId(요청.query.docid)
+        })
+        응답.status(200).send('삭제완료') //ajax요청 시 새로고침이 안되므로 redirect 안해줌
+    }catch(e){
+        응답.status(500).send('An error occurred');
+    }
+    
 })
 
+// 페이지분할기능(데이터 적을때 버튼만들어 사용)
+app.get('/list/:id', async (요청, 응답) => {
+    //5개의 글 찾아서 result 변수에 저장하기
+    let result = await db.collection('post').find().skip((요청.params.id-1) * 5).limit(5).toArray()//5개까지만 보여줌
 
+    응답.render('list.ejs', { 글목록 : result })
+  })
 
+//다음버튼(빠르지만 1000페이지로 한번에 이동 불가능) 
+app.get('/list/next/:id', async (요청, 응답) => {
+    //5개의 글 찾아서 result 변수에 저장하기
+    let result = await db.collection('post')
+    .find({_id : { $gt : new ObjectId(요청.params.id) }})//방금본 마지막 글 다음글 찾음
+    .limit(5).toArray() //5개까지만 보여줌
 
+    응답.render('list.ejs', { 글목록 : result })
+  })
 
+//이전버튼
+app.get('/list/prev/:id', async (요청, 응답) => {
+    try {
+        // 현재 _id보다 작은 문서들을 찾고, 역순으로 정렬하여 최신 5개를 가져옴
+        let result = await db.collection('post')
+            .find({_id: { $lt: new ObjectId(요청.params.id) }})
+            .sort({_id: -1})
+            .limit(5)
+            .toArray();
+
+        
+        result = result.reverse(); //배열을 뒤집어 원래 순서대로 표시
+        응답.render('list.ejs', { 글목록: result });
+    } catch (error) {
+        // 오류 처리
+        console.error(error);
+        응답.status(500).send('서버 오류');
+    }
+});
 

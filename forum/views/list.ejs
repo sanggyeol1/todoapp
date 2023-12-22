@@ -19,48 +19,52 @@
                     <%= 글목록[i].title %>
                   </a>
                   <a href="/edit/<%= 글목록[i]._id %>"> ✏️ </a>
-                  <span class="delete">🗑️</span>
+                  <span class="delete" data-id="<%= 글목록[i]._id %>">🗑️</span>
                 </h4>
                 <p><%= 글목록[i].content %></p>
                 
             </div>
         <% } %>
     </div>
-    
+    <a href="/list/prev/<%= 글목록[0]._id %>">이전</a>
+    <a href="/list/next/<%= 글목록[글목록.length-1]._id %>">다음</a>
+
     <script>
        
 
     //form 태그로 get post요청을 하면 새로고침이 됨
-    // -> ajax이용
+    // -> ajax로 delete요청 시 body가 잘 안가는 경우 있음 
+    // -> querystring 이용
+    for(let i = 0; i < '<%=글목록.length%>'; i++){
+        document.querySelectorAll('.delete')[i].addEventListener('click', function(e){
+        fetch('/delete?docid=' + e.target.dataset.id, {//e.target을 활용하여 querystring으로 id 전송
+            method : 'DELETE'
+        })//fetch이후에 실행될 코드
+        .then((r)=>{
+        if(r.status == 200){//서버가 성공 status 전송시
+            return r.text() //서버가 보낸게 text면 r.text(), Array,Object면 r.Json 반환
+        }else{
+            //서버가 에러전송시
+            alert('error')
+        }})
+        .then((result)=>{
+            //성공시 실행코드 
+            console.log(result)
+        })
+        .catch((error)=>{
+            //인터넷문제 등으로 실패시 실행코드
+            console.log(error)
+        })
+        .then(()=>{//이미지상으로 숨겨주는 코드
+            e.target.parentElement.parentElement.style.display = 'none'
+        })
         
-    <% for(let i = 0; i < 글목록.length; i++){ %>
-    document.querySelectorAll('.delete')[<%= i %>].addEventListener('click', function(){
-        fetch('/abc', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ _id: '<%= 글목록[i]._id %>' })
-        })
-        .then(response => {
-            if(response.ok) {
-                return response.json();
-            } else {
-                throw new Error('Server response wasn\'t OK');
-            }
-        })
-        .then(data => {
-            console.log('Success:', data);
-            // 성공 시 수행할 작업
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            // 오류 발생 시 처리
-        });
-    });
-<% } %>
+      })
+    }
+
+    // 예외처리 형식
   
-        
+    
 
     </script>
     <!-- 서버로 데이터보내는 다른 방법 : 
