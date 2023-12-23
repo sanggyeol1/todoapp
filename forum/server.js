@@ -7,7 +7,21 @@ app.use(methodOverride('_method'))//form태그에서 put요청, delete요청 가
 app.use(express.static(__dirname + '/public'))//퍼블릭 폴더 안의 static 파일 사용
 app.set('view engine', 'ejs')//ejs사용 문법
 app.use(express.json())
-app.use(express.urlencoded({extended:true}))//요청.body쓰기위한 코드
+app.use(express.urlencoded({extended:true}))//요청.body사용가능
+
+//passport 라이브러리 세팅
+const session = require('express-session')
+const passport = require('passport')
+const LocalStrategy = require('passport-local')
+
+app.use(passport.initialize())
+app.use(session({
+  secret: '암호화에 쓸 비번',
+  resave : false, // 요청날릴때마다 세션 갱신할건지
+  saveUninitialized : false, // 로그인안해도 세션 만들건지
+  cookie : { maxAge : 60*60*1000 }//세션데이터 유효기간 1시간
+}))
+app.use(passport.session()) 
 
 
 //db에 연동하는 코드
@@ -147,7 +161,6 @@ app.get('/list/prev/:id', async (요청, 응답) => {
             .limit(5)
             .toArray();
 
-        
         result = result.reverse(); //배열을 뒤집어 원래 순서대로 표시
         응답.render('list.ejs', { 글목록: result });
     } catch (error) {
@@ -156,4 +169,69 @@ app.get('/list/prev/:id', async (요청, 응답) => {
         응답.status(500).send('서버 오류');
     }
 });
+
+
+
+//session회원기능
+//npm install express-session passport passport-local 
+
+//제출한 id/비번 db와검사하는 로직(라이브러리)
+passport.use(new LocalStrategy(async (입력한아이디, 입력한비번, cb) => {
+    let result = await db.collection('user').findOne({ username : 입력한아이디})
+    if (!result) {
+      return cb(null, false, { message: '아이디 DB에 없음' })
+    }
+    if (result.password == 입력한비번) {
+      return cb(null, result)
+    } else {
+      return cb(null, false, { message: '비번불일치' });
+    }
+  }))
+  //로그인시 마다 실행
+  passport.serializeUser((user, done) => {
+    console.log(user)
+    process.nextTick(() => {//내부코드를 비동기적으로 처리해줌
+      done(null, { id: user._id, username: user.username })
+    })
+  })
+  //쿠키분석
+  passport.deserializeUser(async (user, done) => {
+    let result = await db.collection('user').findOne({_id : new ObjectId(user.id)})
+    delete result.password
+    process.nextTick(() => {
+      return done(null, result)
+    })
+})
+
+
+
+
+app.get('/login', async(요청, 응답)=>{
+    console.log(요청.user)
+    응답.render('login.ejs')
+})
+
+
+
+app.post('/login', async(요청, 응답, next)=>{
+    //id,pw를 db와 비교하는 코드 실행함
+    passport.authenticate('local',(error, user, info)=>{ 
+        if(error) return 응답.status(500).json(error)
+        if(!user) return 응답.status(401).json(info.message)
+        요청.logIn(user, (err)=>{
+            if(err) return next(err)
+            응답.redirect('/')
+        })
+    })(요청, 응답, next)
+})
+
+
+//마이페이지
+app.get('/mypage', async(요청, 응답)=>{
+    if(!요청.user){
+        응답.render('login.ejs')
+    }else{
+        응답.render('mypage.ejs',{user : 요청.user})
+    }
+})
 
