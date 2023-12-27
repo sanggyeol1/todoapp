@@ -1,7 +1,9 @@
 const express = require('express')//express 라이브러리 사용하겠다.
 const app = express()
 const { MongoClient, ObjectId } = require('mongodb');//mongodb 연결, ObjectId 사용
-const methodOverride = require('method-override')//메소드 오버라이딩 사용
+const methodOverride = require('method-override')//메소드 오버라이딩
+const bcrypt = require('bcrypt')//bcrypt세팅
+require('dotenv').config()//환경변수 다른 파일에 저장
 
 app.use(methodOverride('_method'))//form태그에서 put요청, delete요청 가능
 app.use(express.static(__dirname + '/public'))//퍼블릭 폴더 안의 static 파일 사용
@@ -13,24 +15,47 @@ app.use(express.urlencoded({extended:true}))//요청.body사용가능
 const session = require('express-session')
 const passport = require('passport')
 const LocalStrategy = require('passport-local')
+const MongoStore = require('connect-mongo')//세션을 db에 저장 -> npm install connect-mongo
 
 app.use(passport.initialize())
 app.use(session({
   secret: '암호화에 쓸 비번',
   resave : false, // 요청날릴때마다 세션 갱신할건지
   saveUninitialized : false, // 로그인안해도 세션 만들건지
-  cookie : { maxAge : 60*60*1000 }//세션데이터 유효기간 1시간
+  cookie : { maxAge : 60*60*1000 },//세션데이터 유효기간 1시간
+  store : MongoStore.create({
+    mongoUrl : 'mongodb+srv://sanggyeol1:qwe123@cluster0.4pltbdt.mongodb.net/?retryWrites=true&w=majority',
+    dbName : 'forum'//forum 데이터베이스에 session이라는 collection생성됨
+  })
 }))
 app.use(passport.session()) 
+app.use('/write',checkLogin)
+app.use('/mypage',checkLogin)//이 함수 밑에 있는 모든 API에 로그인 체크 미들웨어 적용
 
+//로그인 체크기능
+function checkLogin(요청, 응답, next){
+    if(!요청.user){
+        응답.render('login.ejs')
+    }else{
+        next()
+    }
+}
+//빈칸체크기능
+function checkBlank(요청, 응답, next){
+    if(요청.body.username=='' || 요청.body.password==''){
+        응답.send('아이디 또는 비밀번호가 입력되지 않았습니다.')
+    }else{
+        next()
+    }
+}
 
 //db에 연동하는 코드
 let db;
-const url = 'mongodb+srv://sanggyeol1:qwe123@cluster0.4pltbdt.mongodb.net/?retryWrites=true&w=majority' // mongodb/database/connect/drivers
+const url = process.env.DB_URL // mongodb/database/connect/drivers
 new MongoClient(url).connect().then((client)=>{//디비와 연동
     console.log('DB연결성공')
     db = client.db('forum');
-    const server = app.listen(8080, ()=>{//서버열기
+    const server = app.listen(process.env.PORT, ()=>{//서버열기
         console.log('http://localhost:8080 에서 서버 실행중')
     })
 }).catch((err)=>{
@@ -42,13 +67,16 @@ app.get('/', (요청, 응답)=>{
     응답.sendFile(__dirname + '/index.html') // 현재프로젝트 절대경로 + html 파일상대경로
 })
 
+
+
 app.get('/list', async(요청, 응답)=>{
     let result = await db.collection('post').find().toArray()//collection에 있는 데이터 뽑음
     응답.render('list.ejs', {글목록 : result})//ejs파일은 render
 })
 
+
 app.get('/write', async(요청, 응답)=>{
-    응답.render('write.ejs')
+        응답.render('write.ejs')    
 })
 
 
@@ -58,6 +86,8 @@ app.post('/add', async(요청, 응답)=>{
     try{//코드먼저실행해보고
         if(요청.body.title=='' || 요청.body.content ==''){
             응답.send('제목또는 내용을 입력하시오')
+        }else if(요청.body.title.length > 50) {
+            응답.send('제목을 50자 이내로 작성하시오.');
         }else{
             await db.collection('post').insertOne({ title : 요청.body.title, content : 요청.body.content })
             응답.redirect('/list');//서버기능 끝나면 항상 응답
@@ -137,7 +167,7 @@ app.delete('/delete', async(요청, 응답)=>{
 app.get('/list/:id', async (요청, 응답) => {
     //5개의 글 찾아서 result 변수에 저장하기
     let result = await db.collection('post').find().skip((요청.params.id-1) * 5).limit(5).toArray()//5개까지만 보여줌
-
+    console.log(요청.user)
     응답.render('list.ejs', { 글목록 : result })
   })
 
@@ -179,12 +209,13 @@ app.get('/list/prev/:id', async (요청, 응답) => {
 passport.use(new LocalStrategy(async (입력한아이디, 입력한비번, cb) => {
     let result = await db.collection('user').findOne({ username : 입력한아이디})
     if (!result) {
-      return cb(null, false, { message: '아이디 DB에 없음' })
+      return cb(null, false, { message: '존재하지 않는 아이디' })
     }
-    if (result.password == 입력한비번) {
+    //해싱된 비밀번호와 입력한 비밀번호 일치여부
+    if (await bcrypt.compare(입력한비번, result.password)) {
       return cb(null, result)
     } else {
-      return cb(null, false, { message: '비번불일치' });
+      return cb(null, false, { message: '비밀번호가 일치하지 않음' });
     }
   }))
   //로그인시 마다 실행
@@ -194,7 +225,9 @@ passport.use(new LocalStrategy(async (입력한아이디, 입력한비번, cb) =
       done(null, { id: user._id, username: user.username })
     })
   })
+
   //쿠키분석
+  //deserializeUser를 특정 route에서만 실행시키는법?
   passport.deserializeUser(async (user, done) => {
     let result = await db.collection('user').findOne({_id : new ObjectId(user.id)})
     delete result.password
@@ -211,9 +244,7 @@ app.get('/login', async(요청, 응답)=>{
     응답.render('login.ejs')
 })
 
-
-
-app.post('/login', async(요청, 응답, next)=>{
+app.post('/login',checkBlank, async(요청, 응답, next)=>{
     //id,pw를 db와 비교하는 코드 실행함
     passport.authenticate('local',(error, user, info)=>{ 
         if(error) return 응답.status(500).json(error)
@@ -228,10 +259,48 @@ app.post('/login', async(요청, 응답, next)=>{
 
 //마이페이지
 app.get('/mypage', async(요청, 응답)=>{
-    if(!요청.user){
-        응답.render('login.ejs')
-    }else{
+    
         응답.render('mypage.ejs',{user : 요청.user})
-    }
 })
+
+
+//회원가입
+app.get('/register', (요청, 응답)=>{
+    응답.render('register.ejs')
+})
+//예외처리 : username이나 qw가 빈칸, 중복, 너무짧거나 너무 김
+app.post('/register', checkBlank, async(요청, 응답)=>{
+    let result = await db.collection('user').findOne({username : 요청.body.username})
+    
+    try{
+        if(!result){
+            if(요청.body.password != 요청.body.password2){
+                응답.send('회원가입 실패 : 비밀번호 확인 불일치.');
+            }else if(요청.body.password.length < 4){
+                응답.send('회원가입 실패 : 비밀번호를 4자리 이상 입력.');
+            }else{
+                //비밀번호 해싱하여 저장 -> npm install bcrypt
+                let hash = await bcrypt.hash(요청.body.password, 10)//몇번 꼬을지
+                await db.collection('user').insertOne({
+                username : 요청.body.username, 
+                password : hash//해시한 비밀번호 저장
+                })
+                응답.redirect('/')
+            }
+                
+        }else{
+            응답.send('회원가입 실패 : 아이디 중복.');
+        }
+
+    }catch(error){
+        console.error(error);
+        응답.status(500).send('서버 오류');
+    }
+
+    
+
+    
+    
+})
+
 

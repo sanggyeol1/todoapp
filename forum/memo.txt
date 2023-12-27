@@ -48,3 +48,17 @@ get, post요청 시 입장권 제출, 별 이상 없으면 통과
 
 3. Oauth(소셜로그인)
 A사이트회원 정보를 B사이트에서 사용
+
+
+
+비밀번호를 해싱할 때 row하게 전체를 해싱하는것보다 salt라는 임의의 추가 문자를 더하여 해싱하면 더 안정적임
+
+ex)sanggyeol1abc123 -> 해싱
+여기서 sanggyeol1은 pw, abc123은 salt이다.
+salt를 쓰면 lookup table attack 과 rainbow table attack을 방어할 수 있다.
+
+환경변수를 다른 파일에 보관하려면?
+npm install dotenv 설치, 
+require('dotenv').config()//환경변수 다른 파일에 저장
+.env파일 생성(env파일은 깃허브에 올리지 말자.)
+
