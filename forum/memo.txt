@@ -62,3 +62,65 @@ npm install dotenv 설치,
 require('dotenv').config()//환경변수 다른 파일에 저장
 .env파일 생성(env파일은 깃허브에 올리지 말자.)
 
+
+
+aws 사용법
+iam 검색, 사용자버튼 클릭 -> 사용자 생성 -> 권한옵션 -> 직접 정책 연결 -> s3검색 ->  AmazonS3FullAccess 선택 -> 생성
+사용자 정보에서 엑세스 키 생성 -> 로컬 코드 선택, 태그입력x, 생성후
+ARN과 엑세스 키, 비밀 엑세스 키 잘 저장해두기
+s3검색 -> 버킷(하드디스크)만들기 -> 지역 서울선택, ACL비활성화
+-> 퍼블릭 엑세스 차단 해제 -> 버킷만들기
+
+버킷 권한설정 둘중하나
+1. 버킷정책
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "1",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::님들버킷명/*"
+        },
+        {
+            "Sid": "2",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "사용자ARN"
+            },
+            "Action": [
+                "s3:PutObject",
+                "s3:DeleteObject"
+            ],
+            "Resource": "arn:aws:s3:::님들버킷명/*"
+        }
+    ]
+} //이거 복붙하면 됨
+Sid : 1번은 모든 유저는 GET이 가능하고
+2번은 관리자만 PUT, DELETE가 가능
+- Actions 항목에서 자료 읽기는 s3:GetObject 쓰기는 s3:PutObject 삭제는 s3:DeleteObject
+- Principal 항목은 어떤 유저인지 명시하는 부분인데 * 쓰면 모든유저, 특정 AWS 계정을 넣고 싶으면 ARN 주소 삽입. 둘째 Principal 항목엔 님들이 액세스 키 발급받았던 그 사용자 계정의 ARN삽입. 
+- Resource는 어떤 버킷인지 버킷명 적으면 됨. 
+
+2. ACL쓰거나(구)
+
+
+버킷정책 저장 후 cors설정
+[
+    {
+        "AllowedHeaders": [
+            "*"
+        ],
+        "AllowedMethods": [
+            "PUT",
+            "POST"
+        ],
+        "AllowedOrigins": [
+            "*"//실제서비스면 도메인com넣는게 좋음
+        ],
+        "ExposeHeaders": [
+            "ETag"
+        ]
+    }
+] 복붙

@@ -89,7 +89,7 @@ app.post('/add', async(요청, 응답)=>{
         }else if(요청.body.title.length > 50) {
             응답.send('제목을 50자 이내로 작성하시오.');
         }else{
-            await db.collection('post').insertOne({ title : 요청.body.title, content : 요청.body.content })
+            await db.collection('post').insertOne({ title : 요청.body.title, content : 요청.body.content, writer : 요청.user.username})
             응답.redirect('/list');//서버기능 끝나면 항상 응답
         }
     }catch(e){//에러가난다면 여기 실행
@@ -114,13 +114,19 @@ app.get('/detail/:id', async(요청, 응답)=>{//detail뒤에 아무 문자나 �
 })
 
 //수정페이지기능
-app.get('/edit/:id', async(요청, 응답)=>{
+app.get('/edit/:id',checkLogin, async(요청, 응답)=>{
     let result = await db.collection('post').findOne({ _id : new ObjectId(요청.params.id) })
-    응답.render('edit.ejs', { result : result })
-  
+
+    if(result.writer != 요청.user.username){
+        응답.send('권한 없음')
+    }else{
+        응답.render('edit.ejs', { result : result })
+    }
 })
 //글수정기능
 app.put('/edit', async(요청, 응답)=>{//npm install method-override : 폼태그에서 put, delete가능
+
+    
     try{
         await db.collection('post').updateOne(
             { _id : new ObjectId(요청.body._id) },//찾아와서
@@ -152,14 +158,24 @@ app.put('/edit', async(요청, 응답)=>{//npm install method-override : 폼태�
 
 //글삭제기능
 app.delete('/delete', async(요청, 응답)=>{
-    try{
-        await db.collection('post').deleteOne({
-            _id : new ObjectId(요청.query.docid)
-        })
-        응답.status(200).send('삭제완료') //ajax요청 시 새로고침이 안되므로 redirect 안해줌
-    }catch(e){
-        응답.status(500).send('An error occurred');
+    
+    let result = await db.collection('post').findOne({ _id : new ObjectId(요청.query.docid) })
+    
+    if (!요청.user) {
+        응답.status(401).json({ message: 'Unauthorized' }); // 로그인하지 않은 경우
+    }else if( 요청.user.username != result.writer ){
+        
+    }else{
+        try{
+            await db.collection('post').deleteOne({
+                _id : result._id
+            })
+            응답.status(200).send('삭제완료') //ajax요청 시 새로고침이 안되므로 redirect 안해줌
+        }catch(e){
+            응답.status(500).send('An error occurred');
+        }
     }
+        
     
 })
 
@@ -168,7 +184,10 @@ app.get('/list/:id', async (요청, 응답) => {
     //5개의 글 찾아서 result 변수에 저장하기
     let result = await db.collection('post').find().skip((요청.params.id-1) * 5).limit(5).toArray()//5개까지만 보여줌
     console.log(요청.user)
-    응답.render('list.ejs', { 글목록 : result })
+    응답.render('list.ejs', { 
+        글목록 : result,
+        user : 요청.user
+    })
   })
 
 //다음버튼(빠르지만 1000페이지로 한번에 이동 불가능) 
@@ -297,10 +316,13 @@ app.post('/register', checkBlank, async(요청, 응답)=>{
         응답.status(500).send('서버 오류');
     }
 
-    
-
-    
-    
 })
 
 
+//로그아웃기능
+app.get('/logout', function(요청, 응답){
+    요청.logout(function(err) {
+      if (err) { return next(err); }
+      응답.redirect('/');
+    });
+  });
