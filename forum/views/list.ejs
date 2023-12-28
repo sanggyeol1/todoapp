@@ -21,7 +21,8 @@
                   <a href="/edit/<%= 글목록[i]._id %>"> ✏️ </a>
                   <span class="delete" data-id="<%= 글목록[i]._id %>">🗑️</span>
                 </h4>
-                <p><%= 글목록[i].content %></p>
+                <p><%= 글목록[i].content.length > 80 ? 글목록[i].content.slice(0, 80) + '...' : 글목록[i].content %></p>
+                <p>작성자 : <%= 글목록[i].writer %></p>
                 
             </div>
         <% } %>
@@ -43,20 +44,22 @@
         .then((r)=>{
         if(r.status == 200){//서버가 성공 status 전송시
             return r.text() //서버가 보낸게 text면 r.text(), Array,Object면 r.Json 반환
+           
         }else{
             //서버가 에러전송시
-            alert('error')
+            window.location.href = '/login';
         }})
         .then((result)=>{
             //성공시 실행코드 
             console.log(result)
+            
         })
         .catch((error)=>{
             //인터넷문제 등으로 실패시 실행코드
             console.log(error)
         })
-        .then(()=>{//이미지상으로 숨겨주는 코드
-            e.target.parentElement.parentElement.style.display = 'none'
+        .then(()=>{
+            e.target.parentElement.parentElement.style.display = 'none'//이미지상으로 숨겨주는 코드
         })
         
       })
