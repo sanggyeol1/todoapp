@@ -28,9 +28,32 @@ app.use(session({
     dbName : 'forum'//forum 데이터베이스에 session이라는 collection생성됨
   })
 }))
-app.use(passport.session()) 
+app.use(passport.session())
 app.use('/write',checkLogin)
 app.use('/mypage',checkLogin)//이 함수 밑에 있는 모든 API에 로그인 체크 미들웨어 적용
+
+//이미지 업로드 라이브러리
+const { S3Client } = require('@aws-sdk/client-s3')
+const multer = require('multer')
+const multerS3 = require('multer-s3')
+const s3 = new S3Client({
+  region : 'ap-northeast-2',//서울
+  credentials : {
+      accessKeyId : process.env.S3_KEY,// 키
+      secretAccessKey : process.env.S3_SECRET //비밀 키
+  }
+})
+
+const upload = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: 'sanggyeolbucket',//버킷명
+    key: function (요청, file, cb) {
+      cb(null, Date.now().toString()) //업로드시 파일명 변경가능
+    }
+  })
+})
+
 
 //로그인 체크기능
 function checkLogin(요청, 응답, next){
@@ -81,7 +104,9 @@ app.get('/write', async(요청, 응답)=>{
 
 
 //글 작성기능, 예외처리 : 제목공백, 내용공백, 제목너무김, 제목에 특수기호포함 등
-app.post('/add', async(요청, 응답)=>{
+app.post('/add', upload.single('img1'),async(요청, 응답)=>{
+
+    console.log(요청.file.location)//이미지 태그 안에 location url넣으면 html상에 이미지 띄워줄 수 있음
 
     try{//코드먼저실행해보고
         if(요청.body.title=='' || 요청.body.content ==''){
@@ -89,7 +114,12 @@ app.post('/add', async(요청, 응답)=>{
         }else if(요청.body.title.length > 50) {
             응답.send('제목을 50자 이내로 작성하시오.');
         }else{
-            await db.collection('post').insertOne({ title : 요청.body.title, content : 요청.body.content, writer : 요청.user.username})
+            await db.collection('post').insertOne({ 
+                title : 요청.body.title, 
+                content : 요청.body.content, 
+                writer : 요청.user.username,
+                img : 요청.file.location
+            })
             응답.redirect('/list');//서버기능 끝나면 항상 응답
         }
     }catch(e){//에러가난다면 여기 실행

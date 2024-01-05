@@ -11,10 +11,11 @@
     <%- include('nav.ejs') %>
 
     <!-- 서버에 포스트 요청 날리는 형식 -->
-    <form class="form-box" action="/add" method="POST"> 
+    <form class="form-box" action="/add" method="POST" enctype="multipart/form-data"> 
         <h4>글쓰기</h4>
         <input name="title">
         <input name="content">
+        <input type="file" name="img1" accept="image/*">
         <button type="submit" style="cursor: pointer;">전송</button>
     </form>
     
