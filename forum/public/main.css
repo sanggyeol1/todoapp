@@ -65,7 +65,8 @@ body{
   .detail-bg{
     background: white;
     padding : 15px;
-    margin-top: 10px;
+    margin: 20px;
+    border-radius: 5px;
   }
 
   a{
@@ -90,4 +91,26 @@ body{
     border : none;
     background : lightgrey;
     border-radius: 5px;
+  }
+
+  .reply-box {
+    padding : 0px 10px 10px 10px;
+    margin : 10px;
+    border-radius: 8px;
+  }
+  .reply-box input {
+    padding : 8px;
+    font-size: 16px;
+    width: 82%;
+    border: 1px solid black;
+    border-radius: 5px;
+  }
+  .reply-box button {
+    padding: 8px;
+    border : none;
+    background : lightgrey;
+    border-radius: 5px;
+  }
+  .reply{
+    border-top: 2px solid #eee;
   }

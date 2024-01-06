@@ -11,7 +11,7 @@
     <%- include('nav.ejs') %>
     
     <form class="search-box" action="/search" method="POST"> 
-        <input name="search_words">
+        <input name="search_words" placeholder="두 글자 이상 입력">
         <button type="submit" style="cursor: pointer;">
             검색
         </button>
@@ -74,7 +74,8 @@
             console.log(error)
         })
         .then(()=>{
-            e.target.parentElement.parentElement.style.display = 'none'//이미지상으로 숨겨주는 코드
+                e.target.parentElement.parentElement.style.display = 'none'//이미지상으로 숨겨주는 코드
+            
         })
         
       })
