@@ -15,11 +15,31 @@
         <p><%= result.writer %></p>
         <h2><%= result.title %></h2>
         <p><%= result.content %></p>
+        
         <img src="<%= result.img %>">
         <br>
     </div>
     
+    
+    <div class="detail-bg">
+        <h4>댓글 작성</h4>
+        <form class="reply-box" action="/add_reply" method="POST">
+            <input name="parent_id" type="hidden" value="<%= result._id %>" >
+            <input name="reply_content">
+            <button type="submit" style="cursor: pointer;">작성</button>
+        </form>
 
+        
+            <% for(let i = 0; i < result2.length; i++) { %>
+                <div class="reply">
+                    <h5><%= result2[i].writer_name %></h5>
+                    <p><%= result2[i].content %></p>
+                </div>
+            <% } %>
+        
+        
+    </div>
+    
 
 </body>
 </html>

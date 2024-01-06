@@ -132,3 +132,9 @@ Sid : 1번은 모든 유저는 GET이 가능하고
 4. 이미지 필요하면 DB에 있던 UR꺼내서 html에 넣기
 
 서버에서는 npm install multer multer-s3 @aws-sdk/client-s3 설치(사용자가 업로드한 이미지를 잘 다루고 s3, aws에서 다룰수 있게 하는 라이브러리)
+
+
+검색기능 : search index를 활용한다.
+정규식의 부분검색기능과 이진탐색의 빠른 속도 두 마리의 토끼를 잡을 수 있음
+mongodb Database -> search indexes -> create search index -> visual aditor ->
+next -> name 은 title_index로 -> refine index로 커스텀 -> lucene.korean으로 바꿈(한국어 상 조사 등 불용어를 걸러냄) -> dynamic mapping 해제(모든 필드에 index만드는 기능) -> Field mapping 에서 title, string 선택(여기서 다른 필드도 인덱싱 선택 가능) -> 조금 기다리면 인덱스 생성됨 -> query누르면 검색테스트 가능(알아서 점수 높은 순으로 정렬)

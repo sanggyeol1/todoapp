@@ -107,9 +107,10 @@ app.get('/write', async(요청, 응답)=>{
 //글 작성기능, 예외처리 : 제목공백, 내용공백, 제목너무김, 제목에 특수기호포함 등
 app.post('/add', upload.single('img1'),async(요청, 응답)=>{
 
-    console.log(요청.file.location)//이미지 태그 안에 location url넣으면 html상에 이미지 띄워줄 수 있음
-
     try{//코드먼저실행해보고
+
+        let imageLocation = 요청.file ? 요청.file.location : '' //이미지 업로드하지 않았을때 공백처리
+        console.log(imageLocation)//이미지 태그 안에 location url넣으면 html상에 이미지 띄워줄 수 있음
         if(요청.body.title=='' || 요청.body.content ==''){
             응답.send('제목또는 내용을 입력하시오')
         }else if(요청.body.title.length > 50) {
@@ -117,11 +118,12 @@ app.post('/add', upload.single('img1'),async(요청, 응답)=>{
         }else{
             await db.collection('post').insertOne({ 
                 title : 요청.body.title, 
-                content : 요청.body.content, 
+                content : 요청.body.content,
+                writer_id : 요청.user._id,
                 writer : 요청.user.username,
-                img : 요청.file.location
+                img : imageLocation
             })
-            응답.redirect('/list');//서버기능 끝나면 항상 응답
+            응답.redirect('/list/1');//서버기능 끝나면 항상 응답
         }
     }catch(e){//에러가난다면 여기 실행
         console.log(e)//에러메세지 출력
@@ -131,9 +133,14 @@ app.post('/add', upload.single('img1'),async(요청, 응답)=>{
 
 //상세페이지기능 : URL파라미터
 app.get('/detail/:id', async(요청, 응답)=>{//detail뒤에 아무 문자나 입력해도 안쪽 코드 실행 /detail/:id/:id2/:id3 이런식으로 여러개 써도 됨
-    try{//예외처리
+    try{
         let result = await db.collection('post').findOne({ _id : new ObjectId(요청.params.id) })// /detail/url이 _id와 동일한 값 찾아옴
-        응답.render('detail.ejs' ,{ result : result })
+        let result2 = await db.collection('reply').find({
+            parent_id : 요청.params.id
+       }).toArray()
+
+       
+        응답.render('detail.ejs' ,{ result : result, result2 : result2 })
         if(result ==  null){
             응답.status(404).send('유효하지 않은 url주소입니다 (404 NotFound).')//예외처리 : 404은 NotFound(주소길이는 같은데 주소가 다름)
         }
@@ -141,8 +148,25 @@ app.get('/detail/:id', async(요청, 응답)=>{//detail뒤에 아무 문자나 �
         console.log(e)
         응답.status(404).send('유효하지 않은 url주소입니다 (404 NotFound).')//예외처리 : 404은 NotFound(주소길이가 다름)
     }
+
+    
+       
     
 })
+//댓글작성기능
+app.post('/add_reply',checkLogin, async (요청, 응답) => {
+    
+    console.log(요청.body)
+    await db.collection('reply').insertOne({
+        parent_id : 요청.body.parent_id,
+        content : 요청.body.reply_content,
+        writer_id : 요청.user._id,
+        writer_name : 요청.user.username
+    })
+    응답.send('댓글작성완료')
+})
+
+
 
 //수정페이지기능
 app.get('/edit/:id',checkLogin, async(요청, 응답)=>{
@@ -195,11 +219,13 @@ app.delete('/delete', async(요청, 응답)=>{
     if (!요청.user) {
         응답.status(401).json({ message: 'Unauthorized' }); // 로그인하지 않은 경우
     }else if( 요청.user.username != result.writer ){
-        
+
     }else{
         try{
             await db.collection('post').deleteOne({
-                _id : result._id
+                _id : result._id,
+                writer_id : 요청.user._id
+               //추가로 작성자_id와 요청.user._id를 비교해주면 좋음
             })
             응답.status(200).send('삭제완료') //ajax요청 시 새로고침이 안되므로 redirect 안해줌
         }catch(e){
@@ -214,7 +240,7 @@ app.delete('/delete', async(요청, 응답)=>{
 app.get('/list/:id', async (요청, 응답) => {
     //5개의 글 찾아서 result 변수에 저장하기
     let result = await db.collection('post').find().skip((요청.params.id-1) * 5).limit(5).toArray()//5개까지만 보여줌
-    console.log(요청.user)
+    
     응답.render('list.ejs', { 
         글목록 : result,
         user : 요청.user
@@ -373,28 +399,33 @@ app.get('/logout', function(요청, 응답){
 app.use('/shop', require('./routes/shop.js') )
 app.use('/board/sub', require('./routes/board/sub.js'))
 
-//검색기능
+
+//검색기능 : mongodb search index 사용
 app.post('/search', async (요청, 응답) => {
     try {
         console.log(요청.body.search_words);
-        let searchRegex = new RegExp(요청.body.search_words, 'i')//대소문자를 구분하지 않고 검색
 
-        let results = await db.collection('post').find({
-            title : { $regex: searchRegex } //정규식
-        }).toArray();
+        let search_condition = [
+            { $search : { //어떤 필드에서 어떤 단어로 검색할지
+                index : 'title_index',
+                text : { query : 요청.body.search_words, path : 'title' }
+            }},
+            //$limit : 게시 갯수 제한해서 보여줌, $skip : 위에서 10개를 skip하고 가져옴(pagination 구현 용이)
+            //$sort : { _id : 1 } id순으로 오름차순 정렬
+            //$project : { _id : 0 } _id필드를 숨겨
+        ]
 
+        let results = await db.collection('post').aggregate(search_condition).toArray()
+       
         if(results.length > 0) {
-            응답.render('search.ejs', { 
-                글목록 : results
-            });
-        } else {
-            응답.send("No items found");
-        }
+            응답.render('search.ejs', { 글목록: results });
+        } else { 응답.send("No items found") }
     } catch (error) {
         console.error(error);
         응답.status(500).send("Error occurred while processing your request");
     }
 });
-// 1. 유저가 A를 포함한 게시글 달라고 get요청을 보내면
-// 2. 서버에서 A를 포함한 글을 찾아서
-// 3. 유저에게 보내줌
+//검색결과 pagination
+
+
+
