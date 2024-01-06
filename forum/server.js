@@ -35,7 +35,8 @@ app.use('/mypage',checkLogin)//이 함수 밑에 있는 모든 API에 로그인 
 //이미지 업로드 라이브러리
 const { S3Client } = require('@aws-sdk/client-s3')
 const multer = require('multer')
-const multerS3 = require('multer-s3')
+const multerS3 = require('multer-s3');
+const connectDB = require('./database.js');
 const s3 = new S3Client({
   region : 'ap-northeast-2',//서울
   credentials : {
@@ -73,9 +74,9 @@ function checkBlank(요청, 응답, next){
 }
 
 //db에 연동하는 코드
+
 let db;
-const url = process.env.DB_URL // mongodb/database/connect/drivers
-new MongoClient(url).connect().then((client)=>{//디비와 연동
+connectDB.then((client)=>{//디비와 연동
     console.log('DB연결성공')
     db = client.db('forum');
     const server = app.listen(process.env.PORT, ()=>{//서버열기
@@ -227,7 +228,12 @@ app.get('/list/next/:id', async (요청, 응답) => {
     .find({_id : { $gt : new ObjectId(요청.params.id) }})//방금본 마지막 글 다음글 찾음
     .limit(5).toArray() //5개까지만 보여줌
 
-    응답.render('list.ejs', { 글목록 : result })
+    if(result.length === 0){
+        응답.send('더이상 다음 글이 없습니다.')
+    }else{
+        응답.render('list.ejs', { 글목록 : result })
+    }
+    
   })
 
 //이전버튼
@@ -241,7 +247,12 @@ app.get('/list/prev/:id', async (요청, 응답) => {
             .toArray();
 
         result = result.reverse(); //배열을 뒤집어 원래 순서대로 표시
-        응답.render('list.ejs', { 글목록: result });
+
+        if(result.length === 0){
+            응답.send('더이상 이전 글이 없습니다.')
+        }else{
+            응답.render('list.ejs', { 글목록 : result })
+        }
     } catch (error) {
         // 오류 처리
         console.error(error);
@@ -356,3 +367,34 @@ app.get('/logout', function(요청, 응답){
       응답.redirect('/');
     });
   });
+
+
+//라우터폴더의 파일 사용
+app.use('/shop', require('./routes/shop.js') )
+app.use('/board/sub', require('./routes/board/sub.js'))
+
+//검색기능
+app.post('/search', async (요청, 응답) => {
+    try {
+        console.log(요청.body.search_words);
+        let searchRegex = new RegExp(요청.body.search_words, 'i')//대소문자를 구분하지 않고 검색
+
+        let results = await db.collection('post').find({
+            title : { $regex: searchRegex } //정규식
+        }).toArray();
+
+        if(results.length > 0) {
+            응답.render('search.ejs', { 
+                글목록 : results
+            });
+        } else {
+            응답.send("No items found");
+        }
+    } catch (error) {
+        console.error(error);
+        응답.status(500).send("Error occurred while processing your request");
+    }
+});
+// 1. 유저가 A를 포함한 게시글 달라고 get요청을 보내면
+// 2. 서버에서 A를 포함한 글을 찾아서
+// 3. 유저에게 보내줌

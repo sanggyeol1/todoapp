@@ -10,8 +10,16 @@
 
     <%- include('nav.ejs') %>
     
+    <form class="search-box" action="/search" method="POST"> 
+        <input name="search_words">
+        <button type="submit" style="cursor: pointer;">
+            검색
+        </button>
+    </form>
+
     <div class="white-bg">
 
+        
         <% for(let i = 0; i < 글목록.length; i++){ %>
             <div class="list-box">
                 <h4>
@@ -26,9 +34,16 @@
                 
             </div>
         <% } %>
+
+
+
+        <div class="list-box" style="background: #eee;">
+            <a href="/list/prev/<%= 글목록[0]._id %>">이전</a>
+            <a href="/list/next/<%= 글목록[글목록.length-1]._id %>">다음</a>
+        </div>
     </div>
-    <a href="/list/prev/<%= 글목록[0]._id %>">이전</a>
-    <a href="/list/next/<%= 글목록[글목록.length-1]._id %>">다음</a>
+    
+    
 
     <script>
        
