@@ -138,3 +138,22 @@ Sid : 1번은 모든 유저는 GET이 가능하고
 정규식의 부분검색기능과 이진탐색의 빠른 속도 두 마리의 토끼를 잡을 수 있음
 mongodb Database -> search indexes -> create search index -> visual aditor ->
 next -> name 은 title_index로 -> refine index로 커스텀 -> lucene.korean으로 바꿈(한국어 상 조사 등 불용어를 걸러냄) -> dynamic mapping 해제(모든 필드에 index만드는 기능) -> Field mapping 에서 title, string 선택(여기서 다른 필드도 인덱싱 선택 가능) -> 조금 기다리면 인덱스 생성됨 -> query누르면 검색테스트 가능(알아서 점수 높은 순으로 정렬)
+
+
+
+채팅방 기능 : 
+유저가 서버와 통신하는 방법 3가지
+1. http - 편지
+2. server sent 
+    - 라디오같은것. 서버가 원할 때 유저에게 데이터 전송 가능, 일방향
+    서버에서 유저에게 계속해서 데이터를 push해줘야 하는 서비스
+
+3. websocket - 전화 
+    - 실시간으로 유저와 서버가 상호 자유롭게 소통 가능
+    - websocket으로 업그레이드 해줘야함
+
+채팅기능
+1. 글마다 채팅버튼 누르면 채팅방 생성(참여자1, 참여자2, 글id) 채팅메시지(부모채팅방id, 채팅내용, 보낸사람id, 보낸사람username)
+2. 내가속한 채팅방 목록 페이지 
+3. 채팅방 누르면 채팅방 상세페이지 보여줌
+4. 메시지 전송시 상대에게 전달/db에 저장

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href = '/main.css' rel="stylesheet">
+</head>
+<body class="grey-bg">
+
+    <%- include('nav.ejs') %>
+    
+
+    <h3 style="margin-left: 20px;">채팅방 리스트</h3>
+    <div class="white-bg">
+
+        
+        <% for(let i = 0; i < 채팅방.length; i++){ %>
+
+            
+            <div class="list-box">
+                <h4>
+                    <%= 채팅방[i].user2_name %>와의 채팅방
+                </h4>
+                
+            </div>
+        <% } %>
+
+
+
+        
+    </div>
+    
+    
+
+    
+
+    
+
+</body>
+</html>
