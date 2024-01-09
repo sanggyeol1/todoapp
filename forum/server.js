@@ -148,22 +148,24 @@ app.get('/detail/:id', async(요청, 응답)=>{//detail뒤에 아무 문자나 �
         console.log(e)
         응답.status(404).send('유효하지 않은 url주소입니다 (404 NotFound).')//예외처리 : 404은 NotFound(주소길이가 다름)
     }
-
-    
-       
-    
 })
 //댓글작성기능
 app.post('/add_reply',checkLogin, async (요청, 응답) => {
     
     console.log(요청.body)
-    await db.collection('reply').insertOne({
-        parent_id : 요청.body.parent_id,
-        content : 요청.body.reply_content,
-        writer_id : 요청.user._id,
-        writer_name : 요청.user.username
-    })
-    응답.send('댓글작성완료')
+     
+    if(요청.body.reply_content != ''){
+        await db.collection('reply').insertOne({
+            parent_id : 요청.body.parent_id,
+            content : 요청.body.reply_content,
+            writer_id : 요청.user._id,
+            writer_name : 요청.user.username
+        })
+        응답.redirect('back')//이전페이지로
+    }else{
+        응답.send('공백문자 작성 불가')
+    }
+    
 })
 
 
@@ -428,4 +430,29 @@ app.post('/search', async (요청, 응답) => {
 //검색결과 pagination
 
 
+//채팅페이지기능
+app.get('/chat/:id',checkLogin ,async(요청, 응답)=>{
+    let result = await db.collection('post').findOne({ _id : new ObjectId(요청.params.id) })
+
+    db.collection('chat_room').insertOne({
+        parent_id : new ObjectId(요청.params.id),
+        user1_id : new ObjectId(요청.user._id),
+        user1_name : 요청.user.username,
+        user2_id : result.writer_id,
+        user2_name : result.writer
+    })
+    
+
+//글의 id를 가진 채팅방을 db에서 찾아옴
+//     let result2 = await db.collection('reply').find({
+//         parent_id : 요청.params.id
+//    }).toArray()
+    응답.render('chat.ejs')
+})
+
+//채팅방리스트
+app.get('/chatlist', async (요청, 응답)=>{
+    let result = await db.collection('chat_room').find().toArray()
+    응답.render('chatlist.ejs', { 채팅방 : result })
+})
 
