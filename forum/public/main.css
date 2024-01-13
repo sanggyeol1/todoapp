@@ -132,3 +132,9 @@ body{
     background: lightgray;
     border-radius: 5px;
   }
+
+  .date-box{
+    font-size: 13px; 
+    margin-bottom: 15px;
+    opacity: 0.5;
+  }

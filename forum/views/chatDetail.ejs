@@ -16,7 +16,12 @@
     <div class="detail-bg">
       <div class="chat-screen">
         <div class="chat-box"><span>안녕하세요</span></div>
-        <div class="chat-box mine"><span>안녕하세요</span></div>
+        <% for(let i = 0; i < result2.length; i++) { %>
+          <div class="chat-box mine">
+              <span><%= result2[i].msg %></span>
+          </div>
+        <% } %>
+        
         
         
       </div>
@@ -35,7 +40,8 @@
       socket.emit('ask-join', '<%= result._id %>')
 
       let now = new Date()
-      document.querySelector('.chat-button').addEventListener('click',function(){
+      document.querySelector('.chat-button')
+      .addEventListener('click',function(){
         let inputValue = document.querySelector('.chat-input').value;
         socket.emit('message-send', { 
           msg : inputValue, room : '<%= result._id %>', date : now 
