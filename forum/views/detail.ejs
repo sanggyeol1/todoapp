@@ -12,7 +12,10 @@
     <%- include('nav.ejs') %>
     
     <div class="detail-bg">
-        <p><%= result.writer %></p>
+        <strong><%= result.writer %></strong>
+        <div class="date-box">
+            <%= result.date.getFullYear() %>.<%= (result.date.getMonth() + 1).toString().padStart(2, '0') %>.<%= result.date.getDate().toString().padStart(2, '0') %>. <%= result.date.getHours().toString().padStart(2, '0') %>:<%= result.date.getMinutes().toString().padStart(2, '0') %>
+        </div>
         <h2><%= result.title %></h2>
         <p><%= result.content %></p>
         
@@ -33,8 +36,11 @@
         
             <% for(let i = 0; i < result2.length; i++) { %>
                 <div class="reply">
-                    <h5><%= result2[i].writer_name %></h5>
+                    <h4><%= result2[i].writer_name %></h4>
                     <p><%= result2[i].content %></p>
+                    <div class="date-box">
+                        <%= result2[i].date.getFullYear() %>.<%= (result2[i].date.getMonth() + 1).toString().padStart(2, '0') %>.<%= result2[i].date.getDate().toString().padStart(2, '0') %>. <%= result2[i].date.getHours().toString().padStart(2, '0') %>:<%= result2[i].date.getMinutes().toString().padStart(2, '0') %>
+                    </div>
                 </div>
             <% } %>
         
@@ -43,4 +49,5 @@
     
 
 </body>
+
 </html>

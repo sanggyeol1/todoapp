@@ -126,7 +126,8 @@ app.post('/add', upload.single('img1'),async(요청, 응답)=>{
                 content : 요청.body.content,
                 writer_id : 요청.user._id,
                 writer : 요청.user.username,
-                img : imageLocation
+                img : imageLocation,
+                date : new Date()
             })
             응답.redirect('/list/1');//서버기능 끝나면 항상 응답
         }
@@ -156,15 +157,14 @@ app.get('/detail/:id', async(요청, 응답)=>{//detail뒤에 아무 문자나 �
 })
 //댓글작성기능
 app.post('/add_reply',checkLogin, async (요청, 응답) => {
-    
-    console.log(요청.body)
      
     if(요청.body.reply_content != ''){
         await db.collection('reply').insertOne({
             parent_id : 요청.body.parent_id,
             content : 요청.body.reply_content,
             writer_id : 요청.user._id,
-            writer_name : 요청.user.username
+            writer_name : 요청.user.username,
+            date : new Date()
         })
         응답.redirect('back')//이전페이지로
     }else{
@@ -172,8 +172,6 @@ app.post('/add_reply',checkLogin, async (요청, 응답) => {
     }
     
 })
-
-
 
 //수정페이지기능
 app.get('/edit/:id',checkLogin, async(요청, 응답)=>{
@@ -462,12 +460,15 @@ app.get('/chat/detail:id', async(req, res) => {
             _id : new ObjectId(req.params.id)
         })
 
+        let result2 = await db.collection('chatmessage').find({
+            room : new ObjectId(req.params.id)
+        }).toArray()
+
         let userId = req.user._id.toString(); // ObjectId를 문자열로 변환
         let isMember = result.member.map(member => member.toString()).includes(userId);
 
         if(isMember){//채팅방 내 멤버인지 확인
-
-            res.render('chatDetail.ejs', {result : result});
+            res.render('chatDetail.ejs', {result : result, result2 : result2});
         } else {
             res.send('비정상적인 접근');
         }
@@ -480,7 +481,6 @@ app.get('/chat/detail:id', async(req, res) => {
 
 // websocket연결
 io.on('connection', async(socket)=>{//어떤 유저가 웹소켓으로 연결할때 코드 실행
-   
     socket.on('ask-join', (data)=>{//room에 집어넣는 기능
         //socket.request.session 이용해서 채팅방에 참가한 유저들만 join하도록 예외처리 해야 함
         socket.join(data)
@@ -488,7 +488,12 @@ io.on('connection', async(socket)=>{//어떤 유저가 웹소켓으로 연결할
 
     socket.on('message-send', async(data)=>{
         //특정 room에만 데이터 전송
-        
+        db.collection('chatmessage').insertOne({
+            msg : data.msg,
+            room :new ObjectId(data.room),
+            date : new Date()
+        })
+
         io.to(data.room).emit('message-broadcast', data.msg)
 
     })
