@@ -10,32 +10,25 @@
 
     <%- include('nav.ejs') %>
     
-
-    <h3 style="margin-left: 20px;">채팅방 리스트</h3>
+    
     <div class="white-bg">
-
-        
-        <% for(let i = 0; i < 채팅방.length; i++){ %>
-
-            
+        <% for(let i = 0; i < result.length; i++){ %>
             <div class="list-box">
                 <h4>
-                    <%= 채팅방[i].user2_name %>와의 채팅방
+                    <a href="/chat/detail<%= result[i]._id %>">
+                        채팅방 <%= i %>
+                    </a>
                 </h4>
+                
+                <p>채팅방설명 ~~</p>
                 
             </div>
         <% } %>
 
 
 
-        
-    </div>
-    
     
 
-    
-
-    
 
 </body>
 </html>

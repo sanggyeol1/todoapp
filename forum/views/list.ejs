@@ -28,7 +28,6 @@
                   </a>
                   <a href="/edit/<%= 글목록[i]._id %>"> ✏️ </a>
                   <span class="delete" data-id="<%= 글목록[i]._id %>">🗑️</span>
-                  <a href="/chat/<%= 글목록[i]._id %>"> 채팅하기 </a>
                 </h4>
                 <p><%= 글목록[i].content.length > 80 ? 글목록[i].content.slice(0, 80) + '...' : 글목록[i].content %></p>
                 <p>작성자 : <%= 글목록[i].writer %></p>

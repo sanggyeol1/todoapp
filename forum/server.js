@@ -5,6 +5,11 @@ const methodOverride = require('method-override')//메소드 오버라이딩
 const bcrypt = require('bcrypt')//bcrypt세팅
 require('dotenv').config()//환경변수 다른 파일에 저장
 
+const { createServer } = require('http')//websoket.io사용
+const { Server } = require('socket.io')
+const server = createServer(app)
+const io = new Server(server) 
+
 app.use(methodOverride('_method'))//form태그에서 put요청, delete요청 가능
 app.use(express.static(__dirname + '/public'))//퍼블릭 폴더 안의 static 파일 사용
 app.set('view engine', 'ejs')//ejs사용 문법
@@ -79,7 +84,7 @@ let db;
 connectDB.then((client)=>{//디비와 연동
     console.log('DB연결성공')
     db = client.db('forum');
-    const server = app.listen(process.env.PORT, ()=>{//서버열기
+    server.listen(process.env.PORT, ()=>{//서버열기
         console.log('http://localhost:8080 에서 서버 실행중')
     })
 }).catch((err)=>{
@@ -430,29 +435,68 @@ app.post('/search', async (요청, 응답) => {
 //검색결과 pagination
 
 
-//채팅페이지기능
-app.get('/chat/:id',checkLogin ,async(요청, 응답)=>{
-    let result = await db.collection('post').findOne({ _id : new ObjectId(요청.params.id) })
-
-    db.collection('chat_room').insertOne({
-        parent_id : new ObjectId(요청.params.id),
-        user1_id : new ObjectId(요청.user._id),
-        user1_name : 요청.user.username,
-        user2_id : result.writer_id,
-        user2_name : result.writer
+//채팅요청기능
+app.get('/chat/request', checkLogin,async(요청, 응답)=>{
+    await db.collection('chatroom').insertOne({
+        member : [요청.user._id, new ObjectId(요청.query.writer_id)],
+        date : new Date()
     })
+  
+    응답.redirect('/chat/list')
+})
+
+//채팅방리스트기능
+app.get('/chat/list',checkLogin, async(요청, 응답)=>{
     
+    let result = await db.collection('chatroom').find({
+        member : 요청.user._id // member가 array여도 알아서 가져와줌
+    }).toArray()
 
-//글의 id를 가진 채팅방을 db에서 찾아옴
-//     let result2 = await db.collection('reply').find({
-//         parent_id : 요청.params.id
-//    }).toArray()
-    응답.render('chat.ejs')
+    응답.render('chatList.ejs', {result : result})
 })
 
-//채팅방리스트
-app.get('/chatlist', async (요청, 응답)=>{
-    let result = await db.collection('chat_room').find().toArray()
-    응답.render('chatlist.ejs', { 채팅방 : result })
+//채팅방상세페이지기능
+app.get('/chat/detail:id', async(req, res) => {
+    try {
+        let result = await db.collection('chatroom').findOne({
+            _id : new ObjectId(req.params.id)
+        })
+
+        let userId = req.user._id.toString(); // ObjectId를 문자열로 변환
+        let isMember = result.member.map(member => member.toString()).includes(userId);
+
+        if(isMember){//채팅방 내 멤버인지 확인
+
+            res.render('chatDetail.ejs', {result : result});
+        } else {
+            res.send('비정상적인 접근');
+        }
+    } catch (error) {
+        console.error(error);
+        res.send('서버 오류');
+    }
+});
+
+
+// websocket연결
+io.on('connection', async(socket)=>{//어떤 유저가 웹소켓으로 연결할때 코드 실행
+   
+    socket.on('ask-join', (data)=>{//room에 집어넣는 기능
+        //socket.request.session 이용해서 채팅방에 참가한 유저들만 join하도록 예외처리 해야 함
+        socket.join(data)
+    })
+
+    socket.on('message-send', async(data)=>{
+        //특정 room에만 데이터 전송
+        
+        io.to(data.room).emit('message-broadcast', data.msg)
+
+    })
+
+    
 })
+
+
+
+
 
