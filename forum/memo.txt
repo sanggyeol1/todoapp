@@ -157,3 +157,22 @@ next -> name 은 title_index로 -> refine index로 커스텀 -> lucene.korean으
 2. 내가속한 채팅방 목록 페이지 
 3. 채팅방 누르면 채팅방 상세페이지 보여줌
 4. 메시지 전송시 상대에게 전달/db에 저장
+
+websocket설치법 :
+1. npm install socket.io@4
+2. server.listen(process.env.PORT, ()=>{ app.listen에서 server.listen으로 바꾸기
+3. 서버 상단에 추가
+const { createServer } = require('http')
+const { Server } = require('socket.io')
+const server = createServer(app)
+const io = new Server(server) 
+
+4. html파일에도 socket.io설치(채팅방 상세페이지에 넣어줌)
+<script src="https://cdn.jsdelivr.net/npm/socket.io@4.7.2/client-dist/socket.io.min.js"></script>
+<script>
+  const socket = io() 
+</script>
+
+
+실제 서비스는 socket.io + DB adapter쓰는게 좋음(공식문서 읽어보자)
+
