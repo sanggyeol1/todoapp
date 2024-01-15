@@ -31,7 +31,6 @@
                 </h4>
                 <p><%= 글목록[i].content.length > 80 ? 글목록[i].content.slice(0, 80) + '...' : 글목록[i].content %></p>
                 <p>작성자 : <%= 글목록[i].writer %></p>
-                
             </div>
         <% } %>
 
@@ -80,8 +79,16 @@
         
       })
     }
+    
 
-    // 예외처리 형식
+    // //server sent events 사용 코드
+    // let eventSource = new EventSource('/stream/list')
+    // eventSource.addEventListener('msg', function(e){
+    //     console.log(e.data)
+    //     let gottedItem = JSON.parse(e.data)
+    //     document.querySelector('.white-bg').insertAdjacentHTML('afterbegin', `<div class="list-box"><h4>${gottedItem.title}</h4></div>`)
+    // })
+    
   
     
 
