@@ -12,16 +12,27 @@
     <%- include('nav.ejs') %>
     
   <%= JSON.stringify(result) %>
-
+  <br><br>
+  <%= JSON.stringify(result2) %>
+  
     <div class="detail-bg">
       <div class="chat-screen">
-        <div class="chat-box"><span>안녕하세요</span></div>
-        <% for(let i = 0; i < result2.length; i++) { %>
-          <div class="chat-box mine">
-              <span><%= result2[i].msg %></span>
-          </div>
-        <% } %>
         
+
+        <% for(let i = 0; i < result2.length; i++) { %>
+          <% if(result2[i].writer_id == userId) { %>
+              <!-- 현재 로그인된 유저가 보낸 메시지 -->
+              <div class="chat-box mine">
+                  <span><%= result2[i].msg %></span>
+              </div>
+          <% } else { %>
+              <!-- 다른 유저가 보낸 메시지 -->
+              <div class="chat-box">
+                  <span><%= result2[i].msg %></span>
+              </div>
+          <% } %>
+      <% } %>
+
         
         
       </div>
@@ -39,9 +50,12 @@
       const socket = io() //웹소켓 연결
       socket.emit('ask-join', '<%= result._id %>')
 
+      
+
       let now = new Date()
       document.querySelector('.chat-button')
       .addEventListener('click',function(){
+
         let inputValue = document.querySelector('.chat-input').value;
         socket.emit('message-send', { 
           msg : inputValue, room : '<%= result._id %>', date : now 

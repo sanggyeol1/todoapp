@@ -22,18 +22,23 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local')
 const MongoStore = require('connect-mongo')//세션을 db에 저장 -> npm install connect-mongo
 
-app.use(passport.initialize())
-app.use(session({
-  secret: '암호화에 쓸 비번',
-  resave : false, // 요청날릴때마다 세션 갱신할건지
-  saveUninitialized : false, // 로그인안해도 세션 만들건지
-  cookie : { maxAge : 60*60*1000 },//세션데이터 유효기간 1시간
-  store : MongoStore.create({
-    mongoUrl : 'mongodb+srv://sanggyeol1:qwe123@cluster0.4pltbdt.mongodb.net/?retryWrites=true&w=majority',
-    dbName : 'forum'//forum 데이터베이스에 session이라는 collection생성됨
+
+const sessionMiddleware = session({
+    secret: '암호화에 쓸 비번',
+    resave : false, // 요청날릴때마다 세션 갱신할건지
+    saveUninitialized : false, // 로그인안해도 세션 만들건지
+    cookie : { maxAge : 60*60*1000 },//세션데이터 유효기간 1시간
+    store : MongoStore.create({
+      mongoUrl : 'mongodb+srv://sanggyeol1:qwe123@cluster0.4pltbdt.mongodb.net/?retryWrites=true&w=majority',
+      dbName : 'forum'//forum 데이터베이스에 session이라는 collection생성됨
+    })
   })
-}))
+app.use(passport.initialize())
+app.use(sessionMiddleware)
 app.use(passport.session())
+io.use((socket, next) => {// Socket.IO와 세션 미들웨어 통합
+    sessionMiddleware(socket.request, {}, next);
+});
 app.use('/write',checkLogin)
 app.use('/mypage',checkLogin)//이 함수 밑에 있는 모든 API에 로그인 체크 미들웨어 적용
 
@@ -81,9 +86,16 @@ function checkBlank(요청, 응답, next){
 //db에 연동하는 코드
 
 let db;
+// let changeStream
 connectDB.then((client)=>{//디비와 연동
     console.log('DB연결성공')
     db = client.db('forum');
+
+    // let condition = [//insert때만
+    //     { $match : { operationType : 'insert' } }
+    // ]
+    // changeStream = db.collection('post').watch(condition)
+
     server.listen(process.env.PORT, ()=>{//서버열기
         console.log('http://localhost:8080 에서 서버 실행중')
     })
@@ -466,9 +478,10 @@ app.get('/chat/detail:id', async(req, res) => {
 
         let userId = req.user._id.toString(); // ObjectId를 문자열로 변환
         let isMember = result.member.map(member => member.toString()).includes(userId);
+        console.log(userId)
 
         if(isMember){//채팅방 내 멤버인지 확인
-            res.render('chatDetail.ejs', {result : result, result2 : result2});
+            res.render('chatDetail.ejs', {result : result, result2 : result2, userId : userId});
         } else {
             res.send('비정상적인 접근');
         }
@@ -481,6 +494,10 @@ app.get('/chat/detail:id', async(req, res) => {
 
 // websocket연결
 io.on('connection', async(socket)=>{//어떤 유저가 웹소켓으로 연결할때 코드 실행
+    
+    const session = socket.request.session;
+    let userId = session.passport.user.id
+
     socket.on('ask-join', (data)=>{//room에 집어넣는 기능
         //socket.request.session 이용해서 채팅방에 참가한 유저들만 join하도록 예외처리 해야 함
         socket.join(data)
@@ -491,16 +508,38 @@ io.on('connection', async(socket)=>{//어떤 유저가 웹소켓으로 연결할
         db.collection('chatmessage').insertOne({
             msg : data.msg,
             room :new ObjectId(data.room),
-            date : new Date()
+            date : new Date(),
+            writer_id : new ObjectId(userId)
         })
 
         io.to(data.room).emit('message-broadcast', data.msg)
 
     })
-
-    
 })
 
+// //server sent event (유저가 요청 안해도 응답 받을 수 있음)
+// app.get('/stream/list', (req, res)=>{
+//     res.writeHead(200, {//http요청을 끊지 않고 유지
+//         "Connection" : "keep-alive",
+//         "Content-Type" : "text/event-stream",
+//         "Cache-Control" : "no-cache"
+//     })
+
+//     // setInterval(()=>{
+//     //     res.write('event: msg\n')
+//     //     res.write('data: 바보\n\n')
+//     // },1000)
+
+
+// //change stream 사용
+   
+//     changeStream.on('change', (result)=>{
+//         console.log(result.fullDocument)
+//         res.write('event: msg\n')
+//         res.write(`data: ${JSON.stringify(result.fullDocument)}\n\n`)
+//     })
+    
+// })
 
 
 
