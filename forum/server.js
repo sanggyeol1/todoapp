@@ -185,6 +185,11 @@ app.post('/add_reply',checkLogin, async (요청, 응답) => {
     }
     
 })
+//대댓글 작성기능
+app.post('/add_reply', async(req, res)=>{
+})
+
+
 
 //수정페이지기능
 app.get('/edit/:id',checkLogin, async(요청, 응답)=>{
@@ -199,7 +204,6 @@ app.get('/edit/:id',checkLogin, async(요청, 응답)=>{
 //글수정기능
 app.put('/edit', async(요청, 응답)=>{//npm install method-override : 폼태그에서 put, delete가능
 
-    
     try{
         await db.collection('post').updateOne(
             { _id : new ObjectId(요청.body._id) },//찾아와서

@@ -61,13 +61,10 @@
         </div>
         <script>
             window.onload = function() {
-              // 모든 'img' 태그를 가져옵니다.
               var images = document.querySelectorAll('img');
             
               images.forEach(function(img) {
-                // 'src' 속성이 비어있는지 확인합니다.
                 if(!img.getAttribute('src') || img.getAttribute('src').trim() === '') {
-                  // 'src' 속성이 비어있다면, 해당 'img' 태그를 제거합니다.
                   img.parentNode.removeChild(img);
                 }
               });
