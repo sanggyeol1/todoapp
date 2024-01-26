@@ -5,13 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link href = '/main.css' rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body class="grey-bg">
 
     <!-- nav bar -->
     <%- include('nav.ejs') %>
-    
+    <%= result._id %>
+    <div class="container">
     <div class="detail-bg">
+        
         <strong><%= result.writer %></strong>
         <div class="date-box">
             <%= result.date.getFullYear() %>.<%= (result.date.getMonth() + 1).toString().padStart(2, '0') %>.<%= result.date.getDate().toString().padStart(2, '0') %>. <%= result.date.getHours().toString().padStart(2, '0') %>:<%= result.date.getMinutes().toString().padStart(2, '0') %>
@@ -19,11 +22,17 @@
         <h2><%= result.title %></h2>
         <p><%= result.content %></p>
         
-        <img src="<%= result.img %>">
-        <br>
+        <img style="max-width: 100%;" src="<%= result.img %>">
+        <br><br>
+        <div class="like-box">
+            <div class="like-icon">
+                <i class="empty-heart fa-regular fa-heart" data-id="<%= result._id %>"></i>
+                <span class="like-count"><%= result.like %></span>
+            </div>
+        </div>
         <a href="/chat/request?writer_id=<%=result.writer_id%>">채팅하기</a>
     </div>
-    
+    <i class="fa-solid fa-heart"></i>
     
     <div class="detail-bg">
         <h4>댓글 작성</h4>
@@ -48,6 +57,42 @@
     </div>
     
 
+    <script>
+        
+
+        document.querySelector('.empty-heart').addEventListener('click', function (e) {
+    fetch('/like?_id=' + e.target.dataset.id, {
+        method: 'POST' 
+    })
+    .then(r => {
+        if (r.status === 200) {
+            console.log('Success:', r.status);
+            return r.text();
+        } else if (r.status === 401 || r.status === 403) {
+            // User is not authenticated
+            window.location.href = '/login';
+            return;
+        } else {
+            // Handle other errors
+            console.error('Server error:', r.status);
+            return;
+        }
+    })
+    .then(result => {
+        if (result) {
+            console.log(result);
+            let likeC = document.querySelector('.like-count').innerHTML;
+            likeC = parseInt(likeC);
+            document.querySelector('.like-count').innerHTML = likeC + 1;
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+    });
+});
+        
+    </script>
+</div>
 </body>
 
 </html>

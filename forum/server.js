@@ -68,10 +68,10 @@ const upload = multer({
 
 //로그인 체크기능
 function checkLogin(요청, 응답, next){
-    if(!요청.user){
-        응답.render('login.ejs')
-    }else{
-        next()
+    if (요청.user) {
+        next(); // User is logged in, proceed to the next middleware/route handler
+    } else {
+        응답.status(401).render('login.ejs');
     }
 }
 //빈칸체크기능
@@ -124,7 +124,7 @@ app.get('/write', async(요청, 응답)=>{
 //글 작성기능, 예외처리 : 제목공백, 내용공백, 제목너무김, 제목에 특수기호포함 등
 app.post('/add', upload.single('img1'),async(요청, 응답)=>{
 
-    try{//코드먼저실행해보고
+    try{
 
         let imageLocation = 요청.file ? 요청.file.location : '' //이미지 업로드하지 않았을때 공백처리
         console.log(imageLocation)//이미지 태그 안에 location url넣으면 html상에 이미지 띄워줄 수 있음
@@ -139,7 +139,8 @@ app.post('/add', upload.single('img1'),async(요청, 응답)=>{
                 writer_id : 요청.user._id,
                 writer : 요청.user.username,
                 img : imageLocation,
-                date : new Date()
+                date : new Date(),
+                like : 0
             })
             응답.redirect('/list/1');//서버기능 끝나면 항상 응답
         }
@@ -213,9 +214,21 @@ app.put('/edit', async(요청, 응답)=>{//npm install method-override : 폼태�
 
 // 좋아요기능
 //$inc ->  누를때마다 +1
-// app.put('/edit', async(요청, 응답)=>{
-//     await db.collection('post').updateOne({ _id : '아이디' }, {$inc : {like : 1}})
-// })
+app.post('/like', checkLogin, async(요청, 응답)=>{
+    try{
+        if(!요청.user){
+        응답.render('login.ejs')// 로그인하지 않은 경우
+    }else{
+            await db.collection('post').updateOne({ _id : new ObjectId(요청.query._id) }, {$inc : {like : 1}})
+            console.log(요청.query._id)
+            응답.status(200).send('좋아요 완료') //ajax요청 시 새로고침이 안되므로 redirect 안해줌
+        }
+    }catch(e){
+        응답.status(500).send('An error occurred');
+    } 
+
+    
+})
 
 //추가정보
 //$mul -> *
@@ -256,7 +269,7 @@ app.delete('/delete', async(요청, 응답)=>{
 // 페이지분할기능(데이터 적을때 버튼만들어 사용)
 app.get('/list/:id', async (요청, 응답) => {
     //5개의 글 찾아서 result 변수에 저장하기
-    let result = await db.collection('post').find().skip((요청.params.id-1) * 5).limit(5).toArray()//5개까지만 보여줌
+    let result = await db.collection('post').find().skip((요청.params.id-1) * 8).limit(8).toArray()//5개까지만 보여줌
     
     응답.render('list.ejs', { 
         글목록 : result,
@@ -269,7 +282,7 @@ app.get('/list/next/:id', async (요청, 응답) => {
     //5개의 글 찾아서 result 변수에 저장하기
     let result = await db.collection('post')
     .find({_id : { $gt : new ObjectId(요청.params.id) }})//방금본 마지막 글 다음글 찾음
-    .limit(5).toArray() //5개까지만 보여줌
+    .limit(8).toArray() //5개까지만 보여줌
 
     if(result.length === 0){
         응답.send('더이상 다음 글이 없습니다.')
@@ -286,7 +299,7 @@ app.get('/list/prev/:id', async (요청, 응답) => {
         let result = await db.collection('post')
             .find({_id: { $lt: new ObjectId(요청.params.id) }})
             .sort({_id: -1})
-            .limit(5)
+            .limit(8)
             .toArray();
 
         result = result.reverse(); //배열을 뒤집어 원래 순서대로 표시

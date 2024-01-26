@@ -11,14 +11,26 @@
     <%- include('nav.ejs') %>
 
     <!-- 서버에 포스트 요청 날리는 형식 -->
-    <form class="form-box" action="/edit?_method=PUT" method="POST"> 
-        <h4>수정</h4>
-        <input name="_id" value="<%= result._id %>" style="display: none;">
-        <input name="title" value="<%= result.title %>">
-        <input name="content" value="<%= result.content %>">
-        <button type="submit" style="cursor: pointer;">수정하기</button>
-    </form>
     
+
+<div class="form-bg">
+        <form class="form-white" action="/edit?_method=PUT" method="POST">
+            <div class="w-100">
+                <h4>수정</h4>
+                <input name="_id" value="<%= result._id %>" style="display: none;">
+                <p>글 제목</p>
+                <input class="form-input" name="title" value="<%= result.title %>">
+            </div>
+            <div class="w-100">
+                <p>글 내용</p>
+                <input class="form-input" name="content" value="<%= result.content %>">
+            </div>
+
+            <div class="bottom-menu">
+                <button class="form-button" type="submit" style="cursor: pointer;">수정하기</button>
+            </div>
+        </form>
+</div>
 
 
 </body>
