@@ -1,140 +1,225 @@
-body{
-    margin : 0;
-}
-.nav{
-    display : flex;
-    padding : 15px;
-    align-items: center;
+body {
+  margin: 0;
 }
 
-.nav a{
-    margin-right:10px;
+a{
+  text-decoration: none; 
+  color: black;
 }
-.logo{
-    font-weight : bold;
-    text-decoration: none;
+
+
+
+
+.logo {
+  font-weight: bold;
+  text-decoration: none;
 }
 
 .grey-bg {
-    background: #eee;
-  }
-  .white-bg {
-    background: white;
-    margin: 20px;
-    border-radius: 5px;
-  }
-  .list-box {
-    padding : 10px;
-    border-bottom: 1px solid#eee;
-    border-top: 1px solid#eee;
-  }
-  .list-box h4{
-    font-size: 16px;
-    margin: 5px;
-  }
-  .list-box p {
-    font-size: 13px;
-    margin: 5px;
-    color: grey;
-  }
+  background: #eee;
+}
 
-  input,div {
-    box-sizing: border-box;
-  }
-  .form-box {
-    background : white;
-    padding : 25px;
-    margin: 20px;
-    border-radius: 8px;
-  }
-  .form-box input {
-    padding : 10px;
-    font-size: 16px;
-    width: 100%;
-    border: 1px solid black;
-    border-radius: 5px;
-    margin-bottom: 10px;
-  }
-  .form-box button {
-    padding: 10px;
-    border : none;
-    background : lightgrey;
-    border-radius: 5px;
-  }
+.white-bg {
+  background: white;
+  margin-top : 8px;
+  border-radius: 5px;
+}
+
+.list-box {
+  padding: 10px;
+  box-shadow: 0px 0px 2px 1px rgb(41, 41, 41, 0.1);
+  border-radius: 6px;
+}
+
+.list-box h4 {
+  font-size: 16px;
+  margin: 5px;
+}
+
+.list-box p {
+  font-size: 13px;
+  margin: 5px;
+  color: grey;
+}
+
+input,
+div {
+  box-sizing: border-box;
+}
+
+
+
+.detail-bg {
+  background: white;
+  padding: 25px;
+  margin-top: 20px;
+  border-radius: 5px;
+}
+
+a {
+  text-decoration: none;
+  color: black;
+}
+
+.search-input {
+  box-shadow: 0px 0px 0px 1px rgb(41, 41, 41, 0.2);
+  margin : 10px;
+  padding: 10px;
+  border-radius: 6px;
+  border:none;
+  width: 90px;
+}
+.search-input:focus {
+  width: 100%;
+  transition : all 0.5s;
+}
+
+.search-btn {
+  background: #595757; color: white;
+}
+
+
+
+.reply-box {
+  padding: 0px 10px 10px 10px;
+  margin: 10px;
+  border-radius: 8px;
+}
+
+.reply-box input {
+  padding: 8px;
+  font-size: 16px;
+  width: 80%;
+  border: 1px solid black;
+  border-radius: 5px;
+}
+
+.reply-box button {
+  padding: 8px;
+  border: none;
+  background: lightgrey;
+  border-radius: 5px;
+}
+
+.reply {
+  border-top: 2px solid #eee;
+  padding-top: 10px;
+}
+
+
+.chat-screen {
+  width: 100%;
+}
+
+.chat-box {
+  margin-top: 15px;
+  display: flex;
   
-  .detail-bg{
-    background: white;
-    padding : 15px;
-    margin: 20px;
-    border-radius: 5px;
-  }
+}
 
-  a{
-    text-decoration: none;
-    color: black;
-  }
+.chat-box span {
+  padding: 10px;
+  background: #eee;
+  border-radius: 16px;
+}
 
-  .search-box {
-    padding : 0px 20px 20px 20px;
-    margin : 20px;
-    border-radius: 8px;
-  }
-  .search-box input {
-    padding : 10px;
-    font-size: 16px;
-    width: 82%;
-    border: 1px solid black;
-    border-radius: 5px;
-  }
-  .search-box button {
-    padding: 10px;
-    border : none;
-    background : lightgrey;
-    border-radius: 5px;
-  }
+.mine {
+  justify-content: end;
+}
 
-  .reply-box {
-    padding : 0px 10px 10px 10px;
-    margin : 10px;
-    border-radius: 8px;
-  }
-  .reply-box input {
-    padding : 8px;
-    font-size: 16px;
-    width: 82%;
-    border: 1px solid black;
-    border-radius: 5px;
-  }
-  .reply-box button {
-    padding: 8px;
-    border : none;
-    background : lightgrey;
-    border-radius: 5px;
-  }
-  .reply{
-    border-top: 2px solid #eee;
-  }
+.chat-input {
+  margin-top: 15px;
+  margin-left: 20px;
+  padding: 10px;
+  border-radius: 5px;
+}
+.chat-input:focus{
+  border-bottom: 1px solid black;
+  padding: 13px;
+}
+
+.chat-button {
+  padding: 10px;
+  border: none;
+  background: lightgray;
+  border-radius: 5px;
+}
+
+.date-box {
+  font-size: 13px;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.form-bg{
+  margin-top: 50px;
+  
+}
+
+.form-white {
+  background: white;
+  padding: 30px;
+  width: 80%;
+  max-width: 900px;
+  margin: auto;
+}
+
+.form-input {
+  width: 100%;
+  padding: 10px;
+  font-size: 20px;
+  border: 2px solid black;
+  border-radius: 5px;
+}
+
+.w-50 {
+  width: 50%;
+  float: left;
+  padding: 10px;
+}
+
+.w-100 {
+  width: 100%;
+  padding: 10px
+}
+
+.form-long {
+  height: 100px;
+}
+
+.bottom-menu {
+  padding: 10px;
+}
+
+.form-button {
+  padding: 8px;
+  display: block;
+  margin-left: auto;
+  background: #eee;
+  border-radius: 13px;
+  width: 25%
+}
 
 
-  .chat-screen{ width: 100%; }
-  .chat-box{ margin-top : 15px; display: flex; }
-  .chat-box span{ padding : 10px; background: #eee; }
-  .mine{ justify-content: end; }
-  .chat-input{
-    margin-top : 15px;
-    margin-left : 20px;
-    padding : 10px;
-    border-radius: 5px;
-  }
-  .chat-button{
-    padding : 10px;
-    border : none;
-    background: lightgray;
-    border-radius: 5px;
-  }
+.prev-next{
+  padding: 50px;
 
-  .date-box{
-    font-size: 13px; 
-    margin-bottom: 15px;
-    opacity: 0.5;
-  }
+}
+
+.like-box{
+  display: flex;
+  justify-content: center;
+}
+.like-icon{
+  font-size: 35px;
+}
+
+.card-body{
+  font-size: 13px;
+  color: gray;
+}
+
+.card-list{
+  box-shadow: 0px 0px 2px 1px rgb(41, 41, 41, 0.1);
+  margin-top: 15px;
+}
