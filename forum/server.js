@@ -154,12 +154,13 @@ app.post('/add', upload.single('img1'),async(요청, 응답)=>{
 app.get('/detail/:id', async(요청, 응답)=>{//detail뒤에 아무 문자나 입력해도 안쪽 코드 실행 /detail/:id/:id2/:id3 이런식으로 여러개 써도 됨
     try{
         let result = await db.collection('post').findOne({ _id : new ObjectId(요청.params.id) })// /detail/url이 _id와 동일한 값 찾아옴
-        let result2 = await db.collection('reply').find({
-            parent_id : 요청.params.id
-       }).toArray()
+        let result2 = await db.collection('reply').find({ parent_id : new ObjectId(요청.params.id) }).toArray()
 
-       
-        응답.render('detail.ejs' ,{ result : result, result2 : result2 })
+        const ids = result2.map(item => item._id);
+        let result3 = await db.collection('re_reply').find({ parent_id: { $in: ids } }).toArray();
+
+
+        응답.render('detail.ejs' ,{ result : result, result2 : result2, result3 : result3})
         if(result ==  null){
             응답.status(404).send('유효하지 않은 url주소입니다 (404 NotFound).')//예외처리 : 404은 NotFound(주소길이는 같은데 주소가 다름)
         }
@@ -169,24 +170,36 @@ app.get('/detail/:id', async(요청, 응답)=>{//detail뒤에 아무 문자나 �
     }
 })
 //댓글작성기능
-app.post('/add_reply',checkLogin, async (요청, 응답) => {
+app.post('/add_reply',checkLogin, async (req, res) => {
      
-    if(요청.body.reply_content != ''){
+    if(req.body.reply_content != ''){
         await db.collection('reply').insertOne({
-            parent_id : 요청.body.parent_id,
-            content : 요청.body.reply_content,
-            writer_id : 요청.user._id,
-            writer_name : 요청.user.username,
+            parent_id : new ObjectId(req.body.parent_id),
+            content : req.body.reply_content,
+            writer_id : req.user._id,
+            writer_name : req.user.username,
             date : new Date()
         })
-        응답.redirect('back')//이전페이지로
+        res.redirect('back')//이전페이지로
     }else{
-        응답.send('공백문자 작성 불가')
+        res.send('공백문자 작성 불가')
     }
     
 })
 //대댓글 작성기능
-app.post('/add_reply', async(req, res)=>{
+app.post('/add_re_reply',checkLogin, async(req, res)=>{
+    if(req.body.re_reply_content != ''){
+        await db.collection('re_reply').insertOne({
+            parent_id : new ObjectId(req.body.parent_id),
+            content : req.body.re_reply_content,
+            writer_id : req.user._id,
+            writer_name : req.user.username,
+            date : new Date()
+        })
+        res.redirect('back')//이전페이지로
+    }else{
+        res.send('공백문자 작성 불가')
+    }
 })
 
 
@@ -202,14 +215,14 @@ app.get('/edit/:id',checkLogin, async(요청, 응답)=>{
     }
 })
 //글수정기능
-app.put('/edit', async(요청, 응답)=>{//npm install method-override : 폼태그에서 put, delete가능
+app.put('/edit',checkLogin, async(요청, 응답)=>{//npm install method-override : 폼태그에서 put, delete가능
 
     try{
         await db.collection('post').updateOne(
             { _id : new ObjectId(요청.body._id) },//찾아와서
             {$set : { title : 요청.body.title, content : 요청.body.content }} //바꿈
           )
-          응답.redirect('/list')//수정 후에는 redirection
+          응답.redirect('/list/1')//수정 후에는 redirection
     }catch(e){
         응답.status(500).send('An error occurred');
         console.log(e)
@@ -271,13 +284,13 @@ app.delete('/delete', async(요청, 응답)=>{
 })
 
 // 페이지분할기능(데이터 적을때 버튼만들어 사용)
-app.get('/list/:id', async (요청, 응답) => {
+app.get('/list/:id', async (req, res) => {
     //5개의 글 찾아서 result 변수에 저장하기
-    let result = await db.collection('post').find().skip((요청.params.id-1) * 8).limit(8).toArray()//5개까지만 보여줌
+    let result = await db.collection('post').find().skip((req.params.id-1) * 8).limit(8).toArray()//5개까지만 보여줌
     
-    응답.render('list.ejs', { 
+    res.render('list.ejs', { 
         글목록 : result,
-        user : 요청.user
+        user : req.user
     })
   })
 
@@ -289,7 +302,7 @@ app.get('/list/next/:id', async (요청, 응답) => {
     .limit(8).toArray() //5개까지만 보여줌
 
     if(result.length === 0){
-        응답.send('더이상 다음 글이 없습니다.')
+        응답.redirect('back')
     }else{
         응답.render('list.ejs', { 글목록 : result })
     }
@@ -309,7 +322,7 @@ app.get('/list/prev/:id', async (요청, 응답) => {
         result = result.reverse(); //배열을 뒤집어 원래 순서대로 표시
 
         if(result.length === 0){
-            응답.send('더이상 이전 글이 없습니다.')
+            응답.redirect('back')
         }else{
             응답.render('list.ejs', { 글목록 : result })
         }

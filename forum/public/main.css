@@ -2,13 +2,15 @@ body {
   margin: 0;
 }
 
-a{
-  text-decoration: none; 
+.none-a {
+  text-decoration: none;
   color: black;
 }
-img{
+
+img {
   max-width: 100%;
 }
+
 
 
 
@@ -18,20 +20,21 @@ img{
 }
 
 .grey-bg {
-  background: #eee;
+  background: whitesmoke
 }
 
 .white-bg {
   background: white;
-  margin-top : 8px;
+  margin-top: 8px;
   border-radius: 5px;
 }
 
 .list-box {
   padding: 10px;
-  box-shadow: 0px 0px 2px 1px rgb(41, 41, 41, 0.1);
+  box-shadow: 0px 0px 2px 1px rgb(41, 41, 41, 0.06);
   border-radius: 6px;
 }
+
 
 .list-box h4 {
   font-size: 16px;
@@ -52,32 +55,30 @@ div {
 
 
 .detail-bg {
+  box-shadow: 0px 0px 2px 1px rgb(41, 41, 41, 0.06);
   background: white;
   padding: 25px;
   margin-top: 20px;
   border-radius: 5px;
 }
 
-a {
-  text-decoration: none;
-  color: black;
-}
-
 .search-input {
-  box-shadow: 0px 0px 0px 1px rgb(41, 41, 41, 0.2);
-  margin : 10px;
+  box-shadow: 0px 0px 0px 1px rgb(41, 41, 41, 0.06);
+  margin: 10px;
   padding: 10px;
   border-radius: 6px;
-  border:none;
+  border: none;
   width: 90px;
 }
+
 .search-input:focus {
   width: 100%;
-  transition : all 0.5s;
+  transition: all 0.5s;
 }
 
 .search-btn {
-  background: #595757; color: white;
+  background: #595757;
+  color: white;
 }
 
 
@@ -116,7 +117,7 @@ a {
 .chat-box {
   margin-top: 15px;
   display: flex;
-  
+
 }
 
 .chat-box span {
@@ -135,7 +136,8 @@ a {
   padding: 10px;
   border-radius: 5px;
 }
-.chat-input:focus{
+
+.chat-input:focus {
   border-bottom: 1px solid black;
   padding: 13px;
 }
@@ -149,13 +151,13 @@ a {
 
 .date-box {
   font-size: 13px;
-  margin-bottom: 15px;
+  margin-bottom: 7px;
   opacity: 0.5;
 }
 
-.form-bg{
+.form-bg {
   margin-top: 50px;
-  
+
 }
 
 .form-white {
@@ -172,6 +174,10 @@ a {
   font-size: 20px;
   border: 2px solid black;
   border-radius: 5px;
+}
+
+.form-input-content {
+  height: 300px;
 }
 
 .w-50 {
@@ -197,40 +203,58 @@ a {
   padding: 8px;
   display: block;
   margin-left: auto;
-  background: #eee;
+  background: white;
   border-radius: 13px;
   width: 25%
 }
 
 
-.prev-next{
+.prev-next {
   padding: 50px;
-
 }
 
-.like-box{
+.like-box {
   display: flex;
   justify-content: center;
 }
-.like-icon{
+
+.like-icon {
   font-size: 35px;
 }
 
-.card-body{
+.card-body {
   font-size: 13px;
   color: gray;
 }
 
-.card-list{
+.card-body a {
+  text-decoration: none;
+  color: black;
+}
+
+.card-list {
   box-shadow: 0px 0px 2px 1px rgb(41, 41, 41, 0.1);
   margin-top: 15px;
 }
 
-.re-reply{
-  display:none;
+.re-reply {
+  display: none;
 }
-.re-reply-open{
+
+.re-reply-open {
   font-size: 13px;
   cursor: pointer;
   opacity: 0.7;
+}
+
+.re-reply-content {
+  padding: 8px;
+  margin : 8px 0px 8px 25px;
+  box-shadow: 0px 0px 2px 1px rgb(41, 41, 41, 0.15);
+  border-radius: 6px;
+}
+
+.re-reply-content p {
+  font-size: 14px;
+  margin: 3px;
 }
