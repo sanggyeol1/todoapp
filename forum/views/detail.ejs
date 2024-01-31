@@ -16,10 +16,10 @@
 <body class="grey-bg">
 
     <!-- nav bar -->
-    <%- include('nav.ejs') %>
+    <%- include('nav.ejs', {user : user}) %>
         <%= result._id %>
             <div class="container">
-                <div class="detail-bg">
+                <div class="detail-bg shadow">
 
                     <strong>
                         <%= result.writer %>
@@ -51,7 +51,7 @@
                 </div>
                 <i class="fa-solid fa-heart"></i>
 
-                <div class="detail-bg">
+                <div class="detail-bg shadow">
                     <h4>댓글 작성</h4>
 
 
@@ -123,57 +123,57 @@
                 </div>
 
 
-                    <script>
-                        var buttons = document.querySelectorAll('.re-reply-open');
+                <script>
+                    var buttons = document.querySelectorAll('.re-reply-open');
 
-                        var replies = document.querySelectorAll('.re-reply');
+                    var replies = document.querySelectorAll('.re-reply');
 
-                        buttons.forEach(function (button, index) {
-                            button.addEventListener('click', function () {
-                                var reReply = replies[index];
+                    buttons.forEach(function (button, index) {
+                        button.addEventListener('click', function () {
+                            var reReply = replies[index];
 
-                                if (reReply.style.display === 'flex') {
-                                    reReply.style.display = 'none';
+                            if (reReply.style.display === 'flex') {
+                                reReply.style.display = 'none';
+                            } else {
+                                reReply.style.display = 'flex';
+                            }
+                        });
+                    });
+
+
+
+                    document.querySelector('.empty-heart').addEventListener('click', function (e) {
+                        fetch('/like?_id=' + e.target.dataset.id, {
+                            method: 'POST'
+                        })
+                            .then(r => {
+                                if (r.status === 200) {
+                                    console.log('Success:', r.status);
+                                    return r.text();
+                                } else if (r.status === 401 || r.status === 403) {
+                                    // User is not authenticated
+                                    window.location.href = '/login';
+                                    return;
                                 } else {
-                                    reReply.style.display = 'flex';
+                                    // Handle other errors
+                                    console.error('Server error:', r.status);
+                                    return;
                                 }
-                            });
-                        });
-
-
-
-                        document.querySelector('.empty-heart').addEventListener('click', function (e) {
-                            fetch('/like?_id=' + e.target.dataset.id, {
-                                method: 'POST'
                             })
-                                .then(r => {
-                                    if (r.status === 200) {
-                                        console.log('Success:', r.status);
-                                        return r.text();
-                                    } else if (r.status === 401 || r.status === 403) {
-                                        // User is not authenticated
-                                        window.location.href = '/login';
-                                        return;
-                                    } else {
-                                        // Handle other errors
-                                        console.error('Server error:', r.status);
-                                        return;
-                                    }
-                                })
-                                .then(result => {
-                                    if (result) {
-                                        console.log(result);
-                                        let likeC = document.querySelector('.like-count').innerHTML;
-                                        likeC = parseInt(likeC);
-                                        document.querySelector('.like-count').innerHTML = likeC + 1;
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error('Fetch error:', error);
-                                });
-                        });
+                            .then(result => {
+                                if (result) {
+                                    console.log(result);
+                                    let likeC = document.querySelector('.like-count').innerHTML;
+                                    likeC = parseInt(likeC);
+                                    document.querySelector('.like-count').innerHTML = likeC + 1;
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Fetch error:', error);
+                            });
+                    });
 
-                    </script>
+                </script>
             </div>
             <br>
             <br>
