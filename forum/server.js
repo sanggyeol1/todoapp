@@ -10,11 +10,11 @@ const { Server } = require('socket.io')
 const server = createServer(app)
 const io = new Server(server) 
 
-app.use(methodOverride('_method'))//form태그에서 put요청, delete요청 가능
+app.use(methodOverride('_method'))//form태그에서 putreq, deletereq 가능
 app.use(express.static(__dirname + '/public'))//퍼블릭 폴더 안의 static 파일 사용
 app.set('view engine', 'ejs')//ejs사용 문법
 app.use(express.json())
-app.use(express.urlencoded({extended:true}))//요청.body사용가능
+app.use(express.urlencoded({extended:true}))//req.body사용가능
 
 //passport 라이브러리 세팅
 const session = require('express-session')
@@ -25,7 +25,7 @@ const MongoStore = require('connect-mongo')//세션을 db에 저장 -> npm insta
 
 const sessionMiddleware = session({
     secret: '암호화에 쓸 비번',
-    resave : false, // 요청날릴때마다 세션 갱신할건지
+    resave : false, // req날릴때마다 세션 갱신할건지
     saveUninitialized : false, // 로그인안해도 세션 만들건지
     cookie : { maxAge : 60*60*1000 },//세션데이터 유효기간 1시간
     store : MongoStore.create({
@@ -39,6 +39,7 @@ app.use(passport.session())
 io.use((socket, next) => {// Socket.IO와 세션 미들웨어 통합
     sessionMiddleware(socket.request, {}, next);
 });
+
 app.use('/write',checkLogin)
 app.use('/mypage',checkLogin)//이 함수 밑에 있는 모든 API에 로그인 체크 미들웨어 적용
 
@@ -59,7 +60,7 @@ const upload = multer({
   storage: multerS3({
     s3: s3,
     bucket: 'sanggyeolbucket',//버킷명
-    key: function (요청, file, cb) {
+    key: function (req, file, cb) {
       cb(null, Date.now().toString()) //업로드시 파일명 변경가능
     }
   })
@@ -67,21 +68,22 @@ const upload = multer({
 
 
 //로그인 체크기능
-function checkLogin(요청, 응답, next){
-    if (요청.user) {
+function checkLogin(req, res, next){
+    if (req.user) {
         next(); // User is logged in, proceed to the next middleware/route handler
     } else {
-        응답.status(401).render('login.ejs');
+        res.status(401).render('login.ejs',{user : req.user});
     }
 }
 //빈칸체크기능
-function checkBlank(요청, 응답, next){
-    if(요청.body.username=='' || 요청.body.password==''){
-        응답.send('아이디 또는 비밀번호가 입력되지 않았습니다.')
+function checkBlank(req, res, next){
+    if(req.body.username=='' || req.body.password==''){
+        res.send('아이디 또는 비밀번호가 입력되지 않았습니다.')
     }else{
         next()
     }
 }
+
 
 //db에 연동하는 코드
 
@@ -103,70 +105,72 @@ connectDB.then((client)=>{//디비와 연동
     console.log(err)
 })
 
-//get요청오면 파일띄워줌
-app.get('/', (요청, 응답)=>{
-    응답.sendFile(__dirname + '/index.html') // 현재프로젝트 절대경로 + html 파일상대경로
+//getreq오면 파일띄워줌
+app.get('/', (req, res)=>{
+
+    res.sendFile(__dirname + '/index.html')
+     // 현재프로젝트 절대경로 + html 파일상대경로
 })
 
 
 
-app.get('/list', async(요청, 응답)=>{
+app.get('/list', async(req, res)=>{
     let result = await db.collection('post').find().toArray()//collection에 있는 데이터 뽑음
-    응답.render('list.ejs', {글목록 : result})//ejs파일은 render
+    res.render('list.ejs', {글목록 : result})//ejs파일은 render
 })
 
 
-app.get('/write', async(요청, 응답)=>{
-        응답.render('write.ejs')    
+app.get('/write', async(req, res)=>{
+        res.render('write.ejs',{user : req.user})    
 })
 
 
 //글 작성기능, 예외처리 : 제목공백, 내용공백, 제목너무김, 제목에 특수기호포함 등
-app.post('/add', upload.single('img1'),async(요청, 응답)=>{
+app.post('/add', upload.single('img1'),async(req, res)=>{
 
     try{
 
-        let imageLocation = 요청.file ? 요청.file.location : '' //이미지 업로드하지 않았을때 공백처리
+        let imageLocation = req.file ? req.file.location : '' //이미지 업로드하지 않았을때 공백처리
         console.log(imageLocation)//이미지 태그 안에 location url넣으면 html상에 이미지 띄워줄 수 있음
-        if(요청.body.title=='' || 요청.body.content ==''){
-            응답.send('제목또는 내용을 입력하시오')
-        }else if(요청.body.title.length > 50) {
-            응답.send('제목을 50자 이내로 작성하시오.');
+        if(req.body.title=='' || req.body.content ==''){
+            res.send('제목또는 내용을 입력하시오')
+        }else if(req.body.title.length > 50) {
+            res.send('제목을 50자 이내로 작성하시오.');
         }else{
             await db.collection('post').insertOne({ 
-                title : 요청.body.title, 
-                content : 요청.body.content,
-                writer_id : 요청.user._id,
-                writer : 요청.user.username,
+                title : req.body.title, 
+                content : req.body.content,
+                writer_id : req.user._id,
+                writer : req.user.username,
                 img : imageLocation,
                 date : new Date(),
                 like : 0
             })
-            응답.redirect('/list/1');//서버기능 끝나면 항상 응답
+            res.redirect('/list/1');//서버기능 끝나면 항상 res
         }
     }catch(e){//에러가난다면 여기 실행
         console.log(e)//에러메세지 출력
-        응답.status(500).send('서버 에러남')//500은 서버상 오류, 프론트에 전달
+        res.status(500).send('서버 에러남')//500은 서버상 오류, 프론트에 전달
     }
 })
 
 //상세페이지기능 : URL파라미터
-app.get('/detail/:id', async(요청, 응답)=>{//detail뒤에 아무 문자나 입력해도 안쪽 코드 실행 /detail/:id/:id2/:id3 이런식으로 여러개 써도 됨
+app.get('/detail/:id', async(req, res)=>{//detail뒤에 아무 문자나 입력해도 안쪽 코드 실행 /detail/:id/:id2/:id3 이런식으로 여러개 써도 됨
     try{
-        let result = await db.collection('post').findOne({ _id : new ObjectId(요청.params.id) })// /detail/url이 _id와 동일한 값 찾아옴
-        let result2 = await db.collection('reply').find({ parent_id : new ObjectId(요청.params.id) }).toArray()
+        let result = await db.collection('post').findOne({ _id : new ObjectId(req.params.id) })// /detail/url이 _id와 동일한 값 찾아옴
+        let result2 = await db.collection('reply').find({ parent_id : new ObjectId(req.params.id) }).toArray()
 
         const ids = result2.map(item => item._id);
         let result3 = await db.collection('re_reply').find({ parent_id: { $in: ids } }).toArray();
 
 
-        응답.render('detail.ejs' ,{ result : result, result2 : result2, result3 : result3})
+        res.render('detail.ejs' ,{ result : result, result2 : result2, result3 : result3, user : req.user})
         if(result ==  null){
-            응답.status(404).send('유효하지 않은 url주소입니다 (404 NotFound).')//예외처리 : 404은 NotFound(주소길이는 같은데 주소가 다름)
+            res.status(404).send('유효하지 않은 url주소입니다 (404 NotFound).')//예외처리 : 404은 NotFound(주소길이는 같은데 주소가 다름)
         }
     }catch(e){
         console.log(e)
-        응답.status(404).send('유효하지 않은 url주소입니다 (404 NotFound).')//예외처리 : 404은 NotFound(주소길이가 다름)
+        res.status(404).send('유효하지 않은 url주소입니다 (404 NotFound).')//예외처리 : 404은 NotFound(주소길이가 다름)
     }
 })
 //댓글작성기능
@@ -205,43 +209,43 @@ app.post('/add_re_reply',checkLogin, async(req, res)=>{
 
 
 //수정페이지기능
-app.get('/edit/:id',checkLogin, async(요청, 응답)=>{
-    let result = await db.collection('post').findOne({ _id : new ObjectId(요청.params.id) })
+app.get('/edit/:id',checkLogin, async(req, res)=>{
+    let result = await db.collection('post').findOne({ _id : new ObjectId(req.params.id) })
 
-    if(result.writer != 요청.user.username){
-        응답.send('권한 없음')
+    if(result.writer != req.user.username){
+        res.send('권한 없음')
     }else{
-        응답.render('edit.ejs', { result : result })
+        res.render('edit.ejs', { result : result, user : req.user })
     }
 })
 //글수정기능
-app.put('/edit',checkLogin, async(요청, 응답)=>{//npm install method-override : 폼태그에서 put, delete가능
+app.put('/edit',checkLogin, async(req, res)=>{//npm install method-override : 폼태그에서 put, delete가능
 
     try{
         await db.collection('post').updateOne(
-            { _id : new ObjectId(요청.body._id) },//찾아와서
-            {$set : { title : 요청.body.title, content : 요청.body.content }} //바꿈
+            { _id : new ObjectId(req.body._id) },//찾아와서
+            {$set : { title : req.body.title, content : req.body.content }} //바꿈
           )
-          응답.redirect('/list/1')//수정 후에는 redirection
+          res.redirect('/list/1')//수정 후에는 redirection
     }catch(e){
-        응답.status(500).send('An error occurred');
+        res.status(500).send('An error occurred');
         console.log(e)
     }
 })
 
 // 좋아요기능
 //$inc ->  누를때마다 +1
-app.post('/like', checkLogin, async(요청, 응답)=>{
+app.post('/like', checkLogin, async(req, res)=>{
     try{
-        if(!요청.user){
-        응답.render('login.ejs')// 로그인하지 않은 경우
+        if(!req.user){
+        res.render('login.ejs')// 로그인하지 않은 경우
     }else{
-            await db.collection('post').updateOne({ _id : new ObjectId(요청.query._id) }, {$inc : {like : 1}})
-            console.log(요청.query._id)
-            응답.status(200).send('좋아요 완료') //ajax요청 시 새로고침이 안되므로 redirect 안해줌
+            await db.collection('post').updateOne({ _id : new ObjectId(req.query._id) }, {$inc : {like : 1}})
+            console.log(req.query._id)
+            res.status(200).send('좋아요 완료') //ajaxreq 시 새로고침이 안되므로 redirect 안해줌
         }
     }catch(e){
-        응답.status(500).send('An error occurred');
+        res.status(500).send('An error occurred');
     } 
 
     
@@ -259,24 +263,24 @@ app.post('/like', checkLogin, async(요청, 응답)=>{
 
 
 //글삭제기능
-app.delete('/delete', async(요청, 응답)=>{
+app.delete('/delete', async(req, res)=>{
     
-    let result = await db.collection('post').findOne({ _id : new ObjectId(요청.query.docid) })
+    let result = await db.collection('post').findOne({ _id : new ObjectId(req.query.docid) })
     
-    if (!요청.user) {
-        응답.status(401).json({ message: 'Unauthorized' }); // 로그인하지 않은 경우
-    }else if( 요청.user.username != result.writer ){
+    if (!req.user) {
+        res.status(401).json({ message: 'Unauthorized' }); // 로그인하지 않은 경우
+    }else if( req.user.username != result.writer ){
 
     }else{
         try{
             await db.collection('post').deleteOne({
                 _id : result._id,
-                writer_id : 요청.user._id
-               //추가로 작성자_id와 요청.user._id를 비교해주면 좋음
+                writer_id : req.user._id
+               //추가로 작성자_id와 req.user._id를 비교해주면 좋음
             })
-            응답.status(200).send('삭제완료') //ajax요청 시 새로고침이 안되므로 redirect 안해줌
+            res.status(200).send('삭제완료') //ajaxreq 시 새로고침이 안되므로 redirect 안해줌
         }catch(e){
-            응답.status(500).send('An error occurred');
+            res.status(500).send('An error occurred');
         }
     }
         
@@ -295,26 +299,26 @@ app.get('/list/:id', async (req, res) => {
   })
 
 //다음버튼(빠르지만 1000페이지로 한번에 이동 불가능) 
-app.get('/list/next/:id', async (요청, 응답) => {
+app.get('/list/next/:id', async (req, res) => {
     //5개의 글 찾아서 result 변수에 저장하기
     let result = await db.collection('post')
-    .find({_id : { $gt : new ObjectId(요청.params.id) }})//방금본 마지막 글 다음글 찾음
+    .find({_id : { $gt : new ObjectId(req.params.id) }})//방금본 마지막 글 다음글 찾음
     .limit(8).toArray() //5개까지만 보여줌
 
     if(result.length === 0){
-        응답.redirect('back')
+        res.redirect('back')
     }else{
-        응답.render('list.ejs', { 글목록 : result })
+        res.render('list.ejs', { 글목록 : result, user : req.user })
     }
     
   })
 
 //이전버튼
-app.get('/list/prev/:id', async (요청, 응답) => {
+app.get('/list/prev/:id', async (req, res) => {
     try {
         // 현재 _id보다 작은 문서들을 찾고, 역순으로 정렬하여 최신 5개를 가져옴
         let result = await db.collection('post')
-            .find({_id: { $lt: new ObjectId(요청.params.id) }})
+            .find({_id: { $lt: new ObjectId(req.params.id) }})
             .sort({_id: -1})
             .limit(8)
             .toArray();
@@ -322,14 +326,14 @@ app.get('/list/prev/:id', async (요청, 응답) => {
         result = result.reverse(); //배열을 뒤집어 원래 순서대로 표시
 
         if(result.length === 0){
-            응답.redirect('back')
+            res.redirect('back')
         }else{
-            응답.render('list.ejs', { 글목록 : result })
+            res.render('list.ejs', { 글목록 : result, user : req.user })
         }
     } catch (error) {
         // 오류 처리
         console.error(error);
-        응답.status(500).send('서버 오류');
+        res.status(500).send('서버 오류');
     }
 });
 
@@ -372,72 +376,72 @@ passport.use(new LocalStrategy(async (입력한아이디, 입력한비번, cb) =
 
 
 
-app.get('/login', async(요청, 응답)=>{
-    console.log(요청.user)
-    응답.render('login.ejs')
+app.get('/login', async(req, res)=>{
+    console.log(req.user)
+    res.render('login.ejs',{user : req.user})
 })
 
-app.post('/login',checkBlank, async(요청, 응답, next)=>{
+app.post('/login',checkBlank, async(req, res, next)=>{
     //id,pw를 db와 비교하는 코드 실행함
     passport.authenticate('local',(error, user, info)=>{ 
-        if(error) return 응답.status(500).json(error)
-        if(!user) return 응답.status(401).json(info.message)
-        요청.logIn(user, (err)=>{
+        if(error) return res.status(500).json(error)
+        if(!user) return res.status(401).json(info.message)
+        req.logIn(user, (err)=>{
             if(err) return next(err)
-            응답.redirect('/')
+            res.redirect('/list/1')
         })
-    })(요청, 응답, next)
+    })(req, res, next)
 })
 
 
 //마이페이지
-app.get('/mypage', async(요청, 응답)=>{
+app.get('/mypage', async(req, res)=>{
     
-        응답.render('mypage.ejs',{user : 요청.user})
+        res.render('mypage.ejs',{user : req.user})
 })
 
 
 //회원가입
-app.get('/register', (요청, 응답)=>{
-    응답.render('register.ejs')
+app.get('/register', (req, res)=>{
+    res.render('register.ejs',{user : req.user})
 })
 //예외처리 : username이나 qw가 빈칸, 중복, 너무짧거나 너무 김
-app.post('/register', checkBlank, async(요청, 응답)=>{
-    let result = await db.collection('user').findOne({username : 요청.body.username})
+app.post('/register', checkBlank, async(req, res)=>{
+    let result = await db.collection('user').findOne({username : req.body.username})
     
     try{
         if(!result){
-            if(요청.body.password != 요청.body.password2){
-                응답.send('회원가입 실패 : 비밀번호 확인 불일치.');
-            }else if(요청.body.password.length < 4){
-                응답.send('회원가입 실패 : 비밀번호를 4자리 이상 입력.');
+            if(req.body.password != req.body.password2){
+                res.send('회원가입 실패 : 비밀번호 확인 불일치.');
+            }else if(req.body.password.length < 4){
+                res.send('회원가입 실패 : 비밀번호를 4자리 이상 입력.');
             }else{
                 //비밀번호 해싱하여 저장 -> npm install bcrypt
-                let hash = await bcrypt.hash(요청.body.password, 10)//몇번 꼬을지
+                let hash = await bcrypt.hash(req.body.password, 10)//몇번 꼬을지
                 await db.collection('user').insertOne({
-                username : 요청.body.username, 
+                username : req.body.username, 
                 password : hash//해시한 비밀번호 저장
                 })
-                응답.redirect('/')
+                res.redirect('/login')
             }
                 
         }else{
-            응답.send('회원가입 실패 : 아이디 중복.');
+            res.send('회원가입 실패 : 아이디 중복.');
         }
 
     }catch(error){
         console.error(error);
-        응답.status(500).send('서버 오류');
+        res.status(500).send('서버 오류');
     }
 
 })
 
 
 //로그아웃기능
-app.get('/logout', function(요청, 응답){
-    요청.logout(function(err) {
+app.get('/logout', function(req, res){
+    req.logout(function(err) {
       if (err) { return next(err); }
-      응답.redirect('/');
+      res.redirect('/list/1');
     });
   });
 
@@ -448,14 +452,14 @@ app.use('/board/sub', require('./routes/board/sub.js'))
 
 
 //검색기능 : mongodb search index 사용
-app.post('/search', async (요청, 응답) => {
+app.post('/search', async (req, res) => {
     try {
-        console.log(요청.body.search_words);
+        console.log(req.body.search_words);
 
         let search_condition = [
             { $search : { //어떤 필드에서 어떤 단어로 검색할지
                 index : 'title_index',
-                text : { query : 요청.body.search_words, path : 'title' }
+                text : { query : req.body.search_words, path : 'title' }
             }},
             //$limit : 게시 갯수 제한해서 보여줌, $skip : 위에서 10개를 skip하고 가져옴(pagination 구현 용이)
             //$sort : { _id : 1 } id순으로 오름차순 정렬
@@ -465,34 +469,34 @@ app.post('/search', async (요청, 응답) => {
         let results = await db.collection('post').aggregate(search_condition).toArray()
        
         if(results.length > 0) {
-            응답.render('search.ejs', { 글목록: results });
-        } else { 응답.send("No items found") }
+            res.render('search.ejs', { 글목록: results, user : req.user });
+        } else { res.send("No items found") }
     } catch (error) {
         console.error(error);
-        응답.status(500).send("Error occurred while processing your request");
+        res.status(500).send("Error occurred while processing your request");
     }
 });
 //검색결과 pagination
 
 
-//채팅요청기능
-app.get('/chat/request', checkLogin,async(요청, 응답)=>{
+//채팅req기능
+app.get('/chat/request', checkLogin,async(req, res)=>{
     await db.collection('chatroom').insertOne({
-        member : [요청.user._id, new ObjectId(요청.query.writer_id)],
+        member : [req.user._id, new ObjectId(req.query.writer_id)],
         date : new Date()
     })
   
-    응답.redirect('/chat/list')
+    res.redirect('/chat/list')
 })
 
 //채팅방리스트기능
-app.get('/chat/list',checkLogin, async(요청, 응답)=>{
+app.get('/chat/list',checkLogin, async(req, res)=>{
     
     let result = await db.collection('chatroom').find({
-        member : 요청.user._id // member가 array여도 알아서 가져와줌
+        member : req.user._id // member가 array여도 알아서 가져와줌
     }).toArray()
 
-    응답.render('chatList.ejs', {result : result})
+    res.render('chatList.ejs', {result : result})
 })
 
 //채팅방상세페이지기능
@@ -547,9 +551,9 @@ io.on('connection', async(socket)=>{//어떤 유저가 웹소켓으로 연결할
     })
 })
 
-// //server sent event (유저가 요청 안해도 응답 받을 수 있음)
+// //server sent event (유저가 req 안해도 res 받을 수 있음)
 // app.get('/stream/list', (req, res)=>{
-//     res.writeHead(200, {//http요청을 끊지 않고 유지
+//     res.writeHead(200, {//httpreq을 끊지 않고 유지
 //         "Connection" : "keep-alive",
 //         "Content-Type" : "text/event-stream",
 //         "Cache-Control" : "no-cache"

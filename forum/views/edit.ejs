@@ -1,41 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link href = '/main.css' rel="stylesheet">
+    <link href='/main.css' rel="stylesheet">
 </head>
+
 <body class="grey-bg">
 
-    <%- include('nav.ejs') %>
+    <%- include('nav.ejs',{user : user}) %>
 
-    <!-- 서버에 포스트 요청 날리는 형식 -->
-    
+        <!-- 서버에 포스트 요청 날리는 형식 -->
 
-<div class="form-bg">
-        <form class="form-white" action="/edit?_method=PUT" method="POST">
-            <div class="w-100">
-                <h4>수정</h4>
-                <input name="_id" value="<%= result._id %>" style="display: none;">
-                <p>글 제목</p>
-                <input class="form-input" name="title" value="<%= result.title %>">
-            </div>
-            <div class="w-100">
-                <p>글 내용</p>
-                <textarea class="form-input form-input-content" name="content" value="<%= result.content %>"></textarea>
-            </div>
-            <div class="w-100">
-                <p>이미지</p>
-                <img src="<%= result.img %>">
-            </div>
-            
-            <div class="bottom-menu">
-                <button class="form-button" type="submit" style="cursor: pointer;">수정하기</button>
-            </div>
-        </form>
-</div>
+
+        <div class="form-bg">
+            <form class="form-white" action="/edit?_method=PUT" method="POST">
+                <div class="w-100">
+                    <h4>수정</h4>
+                    <input name="_id" value="<%= result._id %>" style="display: none;">
+                    <p>글 제목</p>
+                    <input class="form-input" name="title" value="<%= result.title %>">
+                </div>
+                <div class="w-100">
+                    <p>글 내용</p>
+                    <textarea class="form-input form-input-content" name="content"
+                        value="<%= result.content %>"></textarea>
+                </div>
+                <div class="w-100">
+                    <p>이미지</p>
+                    <img src="<%= result.img %>">
+                </div>
+
+                <div class="bottom-menu">
+                    <button class="form-button" type="submit" style="cursor: pointer;">수정하기</button>
+                </div>
+            </form>
+        </div>
 
 
 </body>
+
 </html>

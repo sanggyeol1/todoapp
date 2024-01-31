@@ -17,7 +17,7 @@
 
 <body>
 
-    <nav class="navbar navbar-expand-lg ">
+    <nav class="navbar navbar-expand-lg shadow">
         <div class="container-fluid">
             <a class="navbar-brand" href="/list/1">한상갤</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
@@ -29,11 +29,15 @@
                 <div class="navbar-nav">
                     
                     <a class="nav-link active" aria-current="page" href="/list/1">list</a>
-                    <a class="nav-link" href="/write">Write</a>
-                    <a class="nav-link" href="/login">Login</a>
-                    <a class="nav-link" href="/logout">logout</a>
-                    <a class="nav-link" href="/register">SignUp</a>
-                    <a class="nav-link" href="/mypage">mypage</a>
+                    <% if(user){ %>
+                        <a class="nav-link" href="/write">Write</a>
+                        <a class="nav-link" href="/logout">logout</a>
+                        <a class="nav-link" href="/mypage">mypage</a>
+                    <% }else{ %>
+                        <a class="nav-link" href="/login">Login</a>
+                        <a class="nav-link" href="/register">SignUp</a>
+                    <% } %>
+        
                 </div>
             </div>
         </div>
