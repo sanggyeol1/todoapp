@@ -1,6 +1,26 @@
-body {
-  margin: 0;
+
+@font-face {
+  font-family: '나눔손글씨';
+  src: url('나눔손글씨 성실체.ttf');
 }
+
+.grey-bg {
+  font-family: '나눔손글씨', 'gulim', 'gothic';
+  
+}
+
+p,
+h6,
+h5,
+h4,
+h3,
+h2,
+h1,
+span {
+    transform: rotate(0.02deg);
+    font-size: 1.3rem;
+}
+
 
 .none-a {
   text-decoration: none;
@@ -152,7 +172,7 @@ div {
 .date-box {
   font-size: 13px;
   margin-bottom: 7px;
-  opacity: 0.5;
+  opacity: 0.8;
 }
 
 .form-bg {
