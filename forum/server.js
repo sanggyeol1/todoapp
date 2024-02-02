@@ -496,7 +496,7 @@ app.get('/chat/list',checkLogin, async(req, res)=>{
         member : req.user._id // member가 array여도 알아서 가져와줌
     }).toArray()
 
-    res.render('chatList.ejs', {result : result})
+    res.render('chatList.ejs', {result : result, user : req.user})
 })
 
 //채팅방상세페이지기능
@@ -515,7 +515,7 @@ app.get('/chat/detail:id', async(req, res) => {
         console.log(userId)
 
         if(isMember){//채팅방 내 멤버인지 확인
-            res.render('chatDetail.ejs', {result : result, result2 : result2, userId : userId});
+            res.render('chatDetail.ejs', {result : result, result2 : result2, userId : userId, user : req.user});
         } else {
             res.send('비정상적인 접근');
         }

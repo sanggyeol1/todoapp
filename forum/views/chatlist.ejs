@@ -8,7 +8,7 @@
 </head>
 <body class="grey-bg">
 
-    <%- include('nav.ejs') %>
+    <%- include('nav.ejs' ,{user : user}) %>
     
     <%= JSON.stringify(result) %>
     <div class="white-bg">

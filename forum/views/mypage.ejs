@@ -8,17 +8,35 @@
 </head>
 <body class="grey-bg">
 
-    <%- include('nav.ejs') %>
+    <%- include('nav.ejs', {user: user}) %>
 
     <div class="form-bg">
 
-    
-    <div class="form-white" > 
+        
+    <div class="form-white" >
         <h3>마이페이지</h3>
-        <h4>유저명 : <%= user.username %></h4>
+        
+
+        <div class="d-flex align-items-center">
+            <div class="flex-shrink-0">
+                <div style="width: 100px; height: 100px; border-radius: 50%; background: black;">
+                    <img src="증명사진.jpg" alt="...">
+                </div>
+              
+            </div>
+            <div class="flex-grow-1 ms-3">
+                <h3>유저명 : <%= user.username %></h3>
+                <p> 경기 성남시 </p>
+                <button type="button" class="btn btn-secondary">instagram</button>
+            </div>
+            <div class="flex-grow-1 ms-3">
+            </div>
+          </div>
     </div>
     
 </div>
 
 </body>
 </html>
+
+

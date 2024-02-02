@@ -9,7 +9,7 @@
 <body class="grey-bg">
 
     <!-- nav bar -->
-    <%- include('nav.ejs') %>
+    <%- include('nav.ejs', {user : user}) %>
     
   <%= JSON.stringify(result) %>
   <br><br>

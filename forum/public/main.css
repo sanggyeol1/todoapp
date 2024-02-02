@@ -205,7 +205,9 @@ div {
   margin-left: auto;
   background: white;
   border-radius: 13px;
-  width: 25%
+  width: 28%;
+  color: black;
+  border : 2px solid black;
 }
 
 
