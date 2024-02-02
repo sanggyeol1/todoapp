@@ -12,6 +12,7 @@ const io = new Server(server)
 
 app.use(methodOverride('_method'))//form태그에서 putreq, deletereq 가능
 app.use(express.static(__dirname + '/public'))//퍼블릭 폴더 안의 static 파일 사용
+
 app.set('view engine', 'ejs')//ejs사용 문법
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))//req.body사용가능
