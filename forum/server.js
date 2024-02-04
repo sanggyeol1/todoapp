@@ -12,7 +12,7 @@ const io = new Server(server)
 
 app.use(methodOverride('_method'))//form태그에서 putreq, deletereq 가능
 app.use(express.static(__dirname + '/public'))//퍼블릭 폴더 안의 static 파일 사용
-
+app.use(express.static(__dirname + '/views'))
 app.set('view engine', 'ejs')//ejs사용 문법
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))//req.body사용가능
@@ -397,8 +397,13 @@ app.post('/login',checkBlank, async(req, res, next)=>{
 
 //마이페이지
 app.get('/mypage', async(req, res)=>{
-    
         res.render('mypage.ejs',{user : req.user})
+})
+app.get('/mypageEdit', async(req, res)=>{
+    res.render('mypageEdit.ejs',{user : req.user})
+})
+app.post('/mypageEdit', async(req, res)=>{
+    console.log(req.body)
 })
 
 
@@ -575,6 +580,8 @@ io.on('connection', async(socket)=>{//어떤 유저가 웹소켓으로 연결할
 //     })
     
 // })
+
+
 
 
 
