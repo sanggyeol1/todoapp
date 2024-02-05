@@ -18,7 +18,7 @@ h2,
 h1,
 span {
     transform: rotate(0.02deg);
-    font-size: 1.3rem;
+    font-size: 1.2rem;
 }
 
 .main-logo{
@@ -227,7 +227,7 @@ div {
 }
 
 .form-input-content {
-  height: 300px;
+  height: 260px;
 }
 
 .w-50 {
@@ -256,6 +256,7 @@ div {
   background: white;
   border-radius: 13px;
   width: 28%;
+  max-width: 150px;
   color: black;
   border : 2px solid black;
 }
