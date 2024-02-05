@@ -402,8 +402,18 @@ app.get('/mypage', async(req, res)=>{
 app.get('/mypageEdit', async(req, res)=>{
     res.render('mypageEdit.ejs',{user : req.user})
 })
-app.post('/mypageEdit', async(req, res)=>{
-    console.log(req.body)
+app.post('/Edit_mypage', async(req, res)=>{
+
+    try{
+        await db.collection('user').updateOne(
+            { _id : new ObjectId(req.body._id) },//찾아와서
+            {$set : { address : req.body.address, introduce : req.body.introduce }} //바꿈
+          )
+          res.redirect('/mypage')//수정 후에는 redirection
+    }catch(e){
+        res.status(500).send('An error occurred');
+        console.log(e)
+    }
 })
 
 

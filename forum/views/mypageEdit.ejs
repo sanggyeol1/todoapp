@@ -17,9 +17,9 @@
 
             <div class="form-white">
                 <h2>마이페이지 수정</h2>
-                <form action="/mypageEdit" method="POST">
+                <form action="/Edit_mypage" method="POST">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-lg-6">
                         <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
                                 <div style="width: 100px; height: 100px; border-radius: 50%; background: none">
@@ -31,17 +31,20 @@
                             <div class="flex-grow-1 ms-3">
                                 <h3>이름 : <%= user.username %>
                                 </h3>
-                                <p>주소 : <input type="text" name="address" value="<%= user.address %>"> </p>
+                                <p>주소 : <input class="form-input" type="text" name="address" value="<%= user.address %>"> </p>
                                 <button type="button" class="btn btn-secondary">instagram</button>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6 mt-3">
+                    <div class="col-lg-6 mt-3">
                         <h4>자기소개</h4>
-                        <textarea name="introduce" value="<%= user.introduce %>"></textarea>
+                        <input name="_id" value="<%= user._id %>" style="display: none;">
+                        <textarea class="form-input form-input-content" name="introduce" ><%= user.introduce %></textarea>
+                        
                     </div>
+                    
                 </div>
-                <button type="submit">제출</button>
+                <button class="form-button" type="submit">제출</button>
             </form>
             </div>
 
