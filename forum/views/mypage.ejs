@@ -22,8 +22,8 @@
                 <div class="col-md-6">
                     <div class="d-flex align-items-center">
                         <div class="flex-shrink-0">
-                            <div style="width: 100px; height: 100px; border-radius: 50%; background: none">
-                                <img src="https://sanggyeolbucket.s3.ap-northeast-2.amazonaws.com/main_logo.webp" alt="...">
+                            <div class="image-container">
+                                <img src="<%= user.profileImg %>" alt="...">
                             </div>
 
                         </div>
@@ -31,7 +31,7 @@
                             <h3>이름 : <%= user.username %>
                             </h3>
                             <p>주소 : <%= user.address %> </p>
-                            <button type="button" class="btn btn-secondary">instagram</button>
+                            
                         </div>
                     </div>
                 </div>

@@ -1,12 +1,12 @@
-
 @font-face {
   font-family: '나눔손글씨';
   src: url('나눔손글씨 성실체.ttf');
 }
 
+
 .grey-bg {
   font-family: '나눔손글씨', 'gulim', 'gothic';
-  
+
 }
 
 p,
@@ -17,32 +17,35 @@ h3,
 h2,
 h1,
 span {
-    transform: rotate(0.02deg);
-    font-size: 1.2rem;
+  transform: rotate(0.02deg);
+  font-size: 1.2rem;
 }
 
-.main-logo{
+.main-logo {
   width: 70px;
   border-radius: 50%;
 }
-.first-bg{
+
+.first-bg {
   text-align: center;
   font-family: '나눔손글씨', 'gulim', 'gothic';
   font-size: 40px;
- 
+
 }
-.first-title-box{
+
+.first-title-box {
   position: absolute;
   top: 1%;
   left: 30%;
   right: 30%;
 }
-.first-button{
+
+.first-button {
   background: none;
   border-radius: 16px;
 }
 
-.first-logo{
+.first-logo {
   width: 100%;
   height: 100%;
 }
@@ -214,7 +217,8 @@ div {
   max-width: 900px;
   margin: auto;
 }
-.form-white a{
+
+.form-white a {
   text-decoration: none;
 }
 
@@ -258,7 +262,7 @@ div {
   width: 28%;
   max-width: 150px;
   color: black;
-  border : 2px solid black;
+  border: 2px solid black;
 }
 
 
@@ -301,7 +305,7 @@ div {
 
 .re-reply-content {
   padding: 8px;
-  margin : 8px 0px 8px 25px;
+  margin: 8px 0px 8px 25px;
   box-shadow: 0px 0px 2px 1px rgb(41, 41, 41, 0.15);
   border-radius: 6px;
 }
@@ -311,3 +315,51 @@ div {
   margin: 3px;
 }
 
+.image-container {
+  position: relative;
+  display: inline-block;
+  width: 110px;
+  height: 110px;
+  background: none;
+  border-radius: 50%;
+}
+
+
+.image-container img {
+  border-radius: 50%;
+}
+
+#imgInput {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.overlay-black {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  border-radius: 50%;
+  transition: all 1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  
+}
+
+.image-container:hover .overlay-black {
+  opacity: 1;
+}
+
+.content-container{
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
