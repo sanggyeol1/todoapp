@@ -402,12 +402,18 @@ app.get('/mypage', async(req, res)=>{
 app.get('/mypageEdit', async(req, res)=>{
     res.render('mypageEdit.ejs',{user : req.user})
 })
-app.post('/Edit_mypage', async(req, res)=>{
-
+app.post('/Edit_mypage', upload.single('img1'), async(req, res)=>{
+   
     try{
+        console.log(req.file)
+        let imageLocation = req.file ? req.file.location : req.user.profileImg //이미지 업로드하지 않았을때 기존 이미지로 대체
         await db.collection('user').updateOne(
             { _id : new ObjectId(req.body._id) },//찾아와서
-            {$set : { address : req.body.address, introduce : req.body.introduce }} //바꿈
+            {$set : { 
+                address : req.body.address, 
+                introduce : req.body.introduce,
+                profileImg : imageLocation
+            }} //바꿈
           )
           res.redirect('/mypage')//수정 후에는 redirection
     }catch(e){
@@ -415,6 +421,8 @@ app.post('/Edit_mypage', async(req, res)=>{
         console.log(e)
     }
 })
+
+
 
 
 //회원가입

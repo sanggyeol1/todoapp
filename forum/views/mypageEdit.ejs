@@ -6,6 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link href='/main.css' rel="stylesheet">
+
+
+    <style>
+
+
+    </style>
 </head>
 
 <body class="grey-bg">
@@ -17,39 +23,72 @@
 
             <div class="form-white">
                 <h2>마이페이지 수정</h2>
-                <form action="/Edit_mypage" method="POST">
-                <div class="row">
-                    <div class="col-lg-6">
-                        <div class="d-flex align-items-center">
-                            <div class="flex-shrink-0">
-                                <div style="width: 100px; height: 100px; border-radius: 50%; background: none">
-                                    <img src="https://sanggyeolbucket.s3.ap-northeast-2.amazonaws.com/main_logo.webp"
-                                        alt="...">
-                                </div>
+                <form action="/Edit_mypage" method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
 
-                            </div>
-                            <div class="flex-grow-1 ms-3">
-                                <h3>이름 : <%= user.username %>
-                                </h3>
-                                <p>주소 : <input class="form-input" type="text" name="address" value="<%= user.address %>"> </p>
-                                <button type="button" class="btn btn-secondary">instagram</button>
+                                    <div class="image-container">
+                                        <div class="overlay-black">
+                                            이미지 바꾸기
+                                        </div>
+
+                                        <img id="profileImg" src="<%= user.profileImg %>" alt="프로필 이미지">
+
+                                        <input class="form-input" id="imgInput" type="file" name="img1" accept="image/*">
+
+                                    </div>
+
+
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h3>이름 : <%= user.username %>
+                                    </h3>
+                                    <p>주소 : <input class="form-input" type="text" name="address"
+                                            value="<%= user.address %>"> </p>
+                                    
+                                </div>
                             </div>
                         </div>
+                        <div class="col-lg-6 mt-3">
+                            <h4>자기소개</h4>
+                            <input name="_id" value="<%= user._id %>" style="display: none;">
+                            <textarea class="form-input form-input-content"
+                                name="introduce"><%= user.introduce %></textarea>
+
+                        </div>
+
                     </div>
-                    <div class="col-lg-6 mt-3">
-                        <h4>자기소개</h4>
-                        <input name="_id" value="<%= user._id %>" style="display: none;">
-                        <textarea class="form-input form-input-content" name="introduce" ><%= user.introduce %></textarea>
-                        
-                    </div>
-                    
-                </div>
-                <button class="form-button" type="submit">제출</button>
-            </form>
+                    <button class="form-button" type="submit">제출</button>
+                </form>
             </div>
 
         </div>
 
+
+        <script>
+            // 파일 입력 필드를 선택
+            document.getElementById('imgInput').addEventListener('change', function(event) {
+                if (event.target.files && event.target.files[0]) {
+                    // FileReader 객체 생성
+                    var reader = new FileReader();
+        
+                    // 파일 로딩 완료 시 실행할 콜백 함수 정의
+                    reader.onload = function(e) {
+                        // 이미지 태그의 src 속성을 업로드한 파일의 내용으로 설정
+                        document.getElementById('profileImg').src = e.target.result;
+                    };
+        
+                    // 선택된 파일을 읽음
+                    reader.readAsDataURL(event.target.files[0]);
+                }
+            });
+        </script>
+
+
 </body>
+
+
 
 </html>

@@ -20,15 +20,14 @@
         <%= result._id %>
             <div class="container">
                 <div class="detail-bg shadow">
-
-                    <strong>
-                        <%= result.writer %>
-                    </strong>
-                    <div class="date-box">
-                        <%= result.date.getFullYear() %>.<%= (result.date.getMonth() + 1).toString().padStart(2, '0' )
-                                %>.<%= result.date.getDate().toString().padStart(2, '0' ) %>. <%=
-                                        result.date.getHours().toString().padStart(2, '0' ) %>:<%=
-                                            result.date.getMinutes().toString().padStart(2, '0' ) %>
+                    <div class="content-container">
+                        <img src="<%= user.profileImg %>" style="margin-right: 10px; width : 50px">
+                        <div>
+                            <strong><%= result.writer %></strong>
+                            <div class="date-box">
+                                <%= result.date.getFullYear() %>.<%= (result.date.getMonth() + 1).toString().padStart(2, '0') %>.<%= result.date.getDate().toString().padStart(2, '0') %>. <%= result.date.getHours().toString().padStart(2, '0') %>:<%= result.date.getMinutes().toString().padStart(2, '0') %>
+                            </div>
+                        </div>
                     </div>
                     <h2>
                         <%= result.title %>

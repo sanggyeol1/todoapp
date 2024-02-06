@@ -1,42 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link href = '/main.css' rel="stylesheet">
-    
+    <link href='/main.css' rel="stylesheet">
+
 </head>
+
 <body class="grey-bg">
 
     <%- include('nav.ejs', {user : user}) %>
 
-    <!-- 서버에 포스트 요청 날리는 형식 -->
-    
-    
-    <div class="form-bg">
-        <form class="form-white" action="/add" method="POST" enctype="multipart/form-data">
-            <div class="w-100">
-                <h4>글쓰기</h4>
-                
-                <p>글 제목</p>
-                <input class="form-input" name="title">
-            </div>
-            <div class="w-100">
-                <p>글 내용</p>
-                <textarea type="textarea" class="form-input form-input-content" name="content"></textarea>
-            </div>
-            <div class="w-100">
-                <p>사진 첨부</p>
-                <input class="form-input" type="file" name="img1" accept="image/*">
-            </div>
-            <div class="bottom-menu">
-                <button class="form-button" type="submit" style="cursor: pointer;">글쓰기</button>
-                
-            </div>
-        </form>
-</div>
+        <!-- 서버에 포스트 요청 날리는 형식 -->
+
+
+        <div class="form-bg">
+            <form class="form-white" action="/add" method="POST" enctype="multipart/form-data">
+                <div class="w-100">
+                    <h4>글쓰기</h4>
+
+                    <p>글 제목</p>
+                    <input class="form-input" name="title">
+                </div>
+                <div class="w-100">
+                    <p>글 내용</p>
+                    <textarea type="textarea" class="form-input form-input-content" name="content"></textarea>
+                </div>
+                <div class="w-100">
+                    <p>사진 첨부</p>
+                    <input class="form-input" id="imgInput1" type="file" name="img1" accept="image/*">
+
+                    <img id="imgPreview" src="#" alt="Image Preview" style="display:none;">
+                </div>
+                <div class="bottom-menu">
+                    <button class="form-button" type="submit" style="cursor: pointer;">글쓰기</button>
+
+                </div>
+
+
+            </form>
+        </div>
 
 
 </body>
+
+<script>
+    document.getElementById('imgInput1').addEventListener('change', function (event) {
+        const reader = new FileReader();
+
+        reader.onload = function (e) {
+            document.getElementById('imgPreview').src = e.target.result;
+            document.getElementById('imgPreview').style.display = 'block';
+        }
+
+        reader.readAsDataURL(event.target.files[0]);
+    });
+</script>
+
+
+
 </html>
