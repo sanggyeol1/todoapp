@@ -164,8 +164,13 @@ app.get('/detail/:id', async(req, res)=>{//detail뒤에 아무 문자나 입력�
         const ids = result2.map(item => item._id);
         let result3 = await db.collection('re_reply').find({ parent_id: { $in: ids } }).toArray();
 
+        let result4 = await db.collection('user').findOne({
+            _id : result.writer_id
+        })
 
-        res.render('detail.ejs' ,{ result : result, result2 : result2, result3 : result3, user : req.user})
+
+
+        res.render('detail.ejs' ,{ result : result, result2 : result2, result3 : result3, result4 : result4, user : req.user})
         if(result ==  null){
             res.status(404).send('유효하지 않은 url주소입니다 (404 NotFound).')//예외처리 : 404은 NotFound(주소길이는 같은데 주소가 다름)
         }
@@ -533,6 +538,8 @@ app.get('/chat/detail:id', async(req, res) => {
         let result2 = await db.collection('chatmessage').find({
             room : new ObjectId(req.params.id)
         }).toArray()
+
+       
 
         let userId = req.user._id.toString(); // ObjectId를 문자열로 변환
         let isMember = result.member.map(member => member.toString()).includes(userId);
