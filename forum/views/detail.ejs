@@ -17,7 +17,6 @@
 
     <!-- nav bar -->
     <%- include('nav.ejs', {user : user}) %>
-        <%= result._id %>
             <div class="container">
                 <div class="detail-bg shadow">
                     <div class="content-container">
@@ -48,7 +47,6 @@
                     </div>
                     <a class="none-a" href="/chat/request?writer_id=<%=result.writer_id%>">채팅하기</a>
                 </div>
-                <i class="fa-solid fa-heart"></i>
 
                 <div class="detail-bg shadow">
                     <h4>댓글 작성</h4>
