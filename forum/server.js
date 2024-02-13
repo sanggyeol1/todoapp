@@ -276,7 +276,7 @@ app.delete('/delete', async(req, res)=>{
     if (!req.user) {
         res.status(401).json({ message: 'Unauthorized' }); // 로그인하지 않은 경우
     }else if( req.user.username != result.writer ){
-
+        res.status(402).send('유저 불일치');
     }else{
         try{
             await db.collection('post').deleteOne({

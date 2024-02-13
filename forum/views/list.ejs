@@ -59,8 +59,9 @@
                     <% } %>
 
                         <div class="prev-next">
-                            <a class="none-a" href="/list/prev/<%= 글목록[0]._id %>"> < - 이전</a>
-                            <a class="none-a" href="/list/next/<%= 글목록[글목록.length-1]._id %>">다음 - ></a>
+                            <a class="none-a" href="/list/prev/<%= 글목록[0]._id %>">
+                                < - 이전</a>
+                                    <a class="none-a" href="/list/next/<%= 글목록[글목록.length-1]._id %>">다음 - ></a>
                         </div>
 
             </div>
@@ -83,33 +84,37 @@
             //form 태그로 get post요청을 하면 새로고침이 됨
             // -> ajax로 delete요청 시 body가 잘 안가는 경우 있음 
             // -> querystring 이용
-            for (let i = 0; i < '<%=글목록.length%>'; i++) {
+            for (let i = 0; i < '<%= 글목록.length %>'; i++) {
                 document.querySelectorAll('.delete')[i].addEventListener('click', function (e) {
-                    fetch('/delete?docid=' + e.target.dataset.id, {//e.target을 활용하여 querystring으로 id 전송
-                        method: 'DELETE'
-                    })//fetch이후에 실행될 코드
-                        .then((r) => {
-                            if (r.status == 200) {//서버가 성공 status 전송시
-                                return r.text() //서버가 보낸게 text면 r.text(), Array,Object면 r.Json 반환
-                            } else {
-                                //서버가 에러전송시
-                                window.location.href = '/login';
-                            }
-                        })
-                        .then((result) => {
-                            //성공시 실행코드 
-                            console.log(result)
-                        })
-                        .catch((error) => {
-                            //인터넷문제 등으로 실패시 실행코드
-                            console.log(error)
-                        })
-                        .then(() => {
-                            e.target.parentElement.parentElement.style.display = 'none'//이미지상으로 숨겨주는 코드
+                    // confirm 대화 상자를 사용하여 사용자에게 삭제 확인 요청
+                    const isConfirmed = confirm('정말로 삭제하시겠습니까?');
 
+                    // 사용자가 '확인'을 클릭한 경우에만 삭제 처리 진행
+                    if (isConfirmed) {
+                        fetch('/delete?docid=' + e.target.dataset.id, {
+                            method: 'DELETE'
                         })
-
-                })
+                            .then((r) => {
+                                if (r.status == 200) {
+                                    return r.text();
+                                }else if(r.status == 402){
+                                    alert('삭제권한이 없는 글입니다.')
+                                    throw new Error('Unauthorized deletion attempt.');
+                                } 
+                                else{
+                                    window.location.href = '/login';
+                                    throw new Error('Redirecting to login.');
+                                }
+                            })
+                            .then((result) => {
+                                console.log(result);
+                                e.target.parentElement.parentElement.style.display = 'none'; // 이미지상으로 숨겨주는 코드
+                            })
+                            .catch((error) => {
+                                console.log(error);
+                            });
+                    }
+                });
             }
 
 
