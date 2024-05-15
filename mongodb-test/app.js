@@ -2,6 +2,12 @@ const { MongoClient } = require("mongodb"); //몽고클라이언트 가져옴
 const uri = `mongodb://localhost:27017/` //compass에 있는 local주소
 const client = new MongoClient(uri) //연결
 
+    
+
+async function run(){
+    const database = client.db('firstDB') //데이터베이스 이름, 생성
+    const users = database.collection('users') //user collection생성
+
     // 단일삽입
     // const userData = await users.insertOne({ name : '상뮈',age : 17 }) 
     // console.log('result', userData)
@@ -34,9 +40,5 @@ const client = new MongoClient(uri) //연결
 
     //프로젝트 _id : 0 이면 _id를 빼고, _id : 1이면 _id만 보여줌
     // const userData = await users.find({name: "noona"}).project({name : 1}).toArray()
-
-async function run(){
-    const database = client.db('firstDB') //데이터베이스 이름, 생성
-    const users = database.collection('users') //user collection생성
 }
 run()
