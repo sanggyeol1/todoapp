@@ -22,10 +22,16 @@ taskController.getTask = async (req, res) =>{
     }
 }
 
-
-
-
-
+taskController.deleteTask = async (req, res)=>{
+    try{
+        const { id } = req.body;
+        const newTask = new Task({ id })
+        
+        res.status(200).json({status : "ok", data : newTask})
+    }catch(err){
+        res.status(400).json({status:"fail", error : err})
+    }
+}
 
 
 module.exports= taskController
