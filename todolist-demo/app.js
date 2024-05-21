@@ -3,7 +3,9 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require("body-parser");
 const indexRouter = require("./routes/index"); //router의 연결고리
+require('dotenv').config()
 const app = express(); //express를 사용한 app
+const MONGODB_URI_PROD = process.env.MONGODB_URI_PROD
 
 // CORS 설정
 const corsOptions = {
@@ -15,7 +17,7 @@ app.use(cors(corsOptions));
 app.use(bodyParser.json()); //req.body읽어오기 위함
 app.use('/api', indexRouter); // api로 호출이 오면 indexRouter로 감
 
-const mongoURI = `mongodb://localhost:27017/todolist-demo`;
+const mongoURI = MONGODB_URI_PROD
 
 mongoose
     .connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -28,6 +30,6 @@ mongoose
 // Preflight 요청에 대한 응답 추가
 app.options('/api/tasks', cors(corsOptions));
 
-app.listen(5000, () => {
+app.listen(process.env.PORT || 5000, () => {
     console.log("server in 5000");
 });
