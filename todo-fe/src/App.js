@@ -56,6 +56,11 @@ function App() {
     }
   }
 
+  const pushTodoValue = () => {
+    if(todoValue != ""){
+      todoList.push({task : todoValue, isComplete : false})
+    }
+  }
 
   useEffect(() => {
     getTasks()
@@ -68,11 +73,11 @@ function App() {
           <input
             value={todoValue}
             onChange={(e) => setTodoValue(e.target.value)}
-            onKeyDown={async (e) => {
+            onKeyDown={(e) => {
               if (e.key === 'Enter') {
+                pushTodoValue()
                 setTodoValue("")
-                await addTask()
-                getTasks()
+                addTask()
               }
             }}
             type="text"
@@ -84,9 +89,9 @@ function App() {
         <Col xs={12} sm={2}>
           <button
             onClick={async () => {
+              pushTodoValue()
               setTodoValue("")
               await addTask()
-              getTasks() //다시 전체 리스트 불러옴
             }}
             className="button-add">추가</button>
         </Col>
