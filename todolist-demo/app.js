@@ -9,7 +9,7 @@ const MONGODB_URI_PROD = process.env.MONGODB_URI_PROD
 
 // CORS 설정
 const corsOptions = {
-  origin: 'http://localhost:3000', // 클라이언트의 도메인
+  origin: 'https://master--taupe-brigadeiros-3227eb.netlify.app', // 클라이언트의 도메인
   optionsSuccessStatus: 200
 };
 
