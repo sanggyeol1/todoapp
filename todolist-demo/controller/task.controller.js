@@ -6,7 +6,8 @@ const taskController = {}
 taskController.createTask = async (req, res) => {
     try {
         const { task, isComplete } = req.body;
-        const newTask = new Task({ task, isComplete })
+        const { userId } = req
+        const newTask = new Task({ task, isComplete, author : userId })
         await newTask.save();
         res.status(200).json({ status: "ok", data: newTask })
     } catch (err) {
@@ -16,7 +17,7 @@ taskController.createTask = async (req, res) => {
 
 taskController.getTask = async (req, res) => {
     try {
-        const taskList = await Task.find({}).select("-__v")
+        const taskList = await Task.find({}).populate("author")//다른 컬렉션에 있는 referenced document를 가져옴
         res.status(200).json({ status: "ok", data: taskList })
     } catch (err) {
         res.status(400).json({ status: "fail", error: err })

@@ -44,4 +44,19 @@ userController.loginWithEmail = async (req, res) => {
     }
 }
 
+userController.getUser = async(req, res) =>{
+    try{
+        const userId = req.userId
+        const user = await User.findById(userId)
+        if(!user){
+            throw new Error("cannot find user")
+        }
+        res.status(200).json({status:"success",  user})
+    }catch(err){
+        res.status(400).json({status:"fail",  message : err.message})
+    }
+}
+
+
 module.exports = userController
+//미들웨어 : 중간에서 작업을 해서 넘김
