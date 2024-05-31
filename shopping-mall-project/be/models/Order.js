@@ -1,11 +1,12 @@
 const mongoose = require("mongoose")
 const Schema = mongoose.Schema
 const orderSchema = Schema({
-    shipTo: { type: String, required: true },
-    contact: { type: String, required: true },
-    totalPrice: { type: Number, required: true },
     userId: { type: mongoose.ObjectId, ref: User },
-    status: { type: String, required: true },
+    status: { type: String, default: "preparing" },
+    totalPrice: { type: Number, required: true, default: 0 },
+    shipTo: { type: Object, required: true },
+    contact: { type: Object, required: true },
+    orderNum: { type: String },
     items: [{
         productId: { type: mongoose.ObjectId, ref: Product },
         size: { type: String, required: true },
