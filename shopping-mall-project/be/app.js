@@ -20,5 +20,5 @@ mongoose.connect(mongoURI, {useNewUrlParser : true})
 
 
 app.listen(process.env.PORT||5000, ()=>{
-    console.log("server on")
+    console.log("server on 5000")
 })

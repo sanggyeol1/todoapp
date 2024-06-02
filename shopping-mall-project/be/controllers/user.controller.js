@@ -21,4 +21,18 @@ userController.createUser = async (req, res) => {
 
 }
 
+
+userController.getUser= async(req, res)=>{
+    try{
+        const { userId } = req.params;
+        const user = await User.findById(userId)
+        if(user){
+            res.status(200).json({status:"success", user})
+        }
+        throw new Error("invaild token")
+    }catch(err){
+        res.status(400).json({status : "error", error: err.message})
+    }
+}
+
 module.exports = userController
