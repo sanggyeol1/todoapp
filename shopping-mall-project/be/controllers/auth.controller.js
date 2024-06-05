@@ -19,22 +19,34 @@ authController.loginWithEmail = async (req, res) => {
         }
         throw new Error("invaild email or password")
     } catch (err) {
-        res.status(400).json({status:'fail', error:err.message})
+        res.status(400).json({ status: 'fail', error: err.message })
     }
 }
 
-authController.authenticate = async(req, res, next)=>{
-    try{
+authController.authenticate = async (req, res, next) => {
+    try {
         const tokenString = req.headers.authorization
-        if(!tokenString) throw new Error("token not found")
-        const token = tokenString.replace("Bearer ","")//순수토큰만 걸러내기
-        jwt.verify(token, JWT_SEC_KEY, (error, payload)=>{
-            if(error) throw new Error("invaild token")
+        if (!tokenString) throw new Error("token not found")
+        const token = tokenString.replace("Bearer ", "")//순수토큰만 걸러내기
+        jwt.verify(token, JWT_SEC_KEY, (error, payload) => {
+            if (error) throw new Error("invaild token")
             req.userId = payload._id
         })
         next();
+    } catch (err) {
+        res.status(400).json({ status: "fail", error: err.message })
+    }
+}
+
+
+authController.checkAdminPermission = async(req, res, next) => {
+    try{
+        const {userId} = req
+        const user = await User.findById(userId)
+        if(user.level !== 'admin') throw new Error("no permission")
+        next()
     }catch(err){
-        res.status(400).json({status:"fail", error : err.message})
+        res.status(400).json({status : "fail", error : err.message})
     }
 }
 
