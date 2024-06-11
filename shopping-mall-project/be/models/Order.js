@@ -1,4 +1,7 @@
 const mongoose = require("mongoose")
+const User = require("./User")
+const Product = require("./Product")
+const Cart = require("./Cart")
 const Schema = mongoose.Schema
 const orderSchema = Schema({
     userId: { type: mongoose.ObjectId, ref: User },
@@ -22,6 +25,13 @@ orderSchema.methods.toJson = function () {
     delete obj.createAt
     return obj
 }
+
+orderSchema.post("save", async function(){
+    //카트를 비워주자
+    const cart = await Cart.findOne({userId:this.userId})
+    cart.items=[]
+    await cart.save()
+})
 
 const Order = mongoose.model("order", orderSchema);
 module.exports = Order;
