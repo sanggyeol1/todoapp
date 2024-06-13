@@ -58,11 +58,13 @@ orderController.getOrder = async(req, res) =>{
 
 orderController.getOrderList = async (req, res, next) => {
     try {
+      const { userId } = req
       const { page, ordernum } = req.query;
   
-      let cond = {};
+      let cond = { userId: userId };
       if (ordernum) {
         cond = {
+          userId: userId,
           orderNum: { $regex: ordernum, $options: "i" },
         };
       }
