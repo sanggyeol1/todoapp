@@ -2,7 +2,9 @@ const jwt = require("jsonwebtoken")
 const User = require('../models/User')
 const bcrypt = require('bcryptjs')
 require("dotenv").config()
+const { OAuth2Client } = require('google-auth-library');
 const JWT_SEC_KEY = process.env.JWT_SECRET_KEY
+const GOOGLE_CLI_ID = process.env.GOOGLE_CLIENT_ID
 const authController = {}
 
 authController.loginWithEmail = async (req, res) => {
@@ -23,6 +25,39 @@ authController.loginWithEmail = async (req, res) => {
     }
 }
 
+authController.loginWithGoogle = async (req, res) => {
+    try {//google auth library 사용
+        const { token } = req.body
+        const googleCilent = new OAuth2Client(GOOGLE_CLI_ID)
+        const ticket = await googleCilent.verifyIdToken({
+            idToken: token,
+            audience: GOOGLE_CLI_ID,
+        })
+        const { email, name } = ticket.getPayload()
+
+        let user = await User.findOne({ email: email })
+        if (!user) {
+            //유저새로생성
+            const randomPassword = "" + Math.floor(Math.random() * 100000000)
+            const salt = await bcrypt.genSalt(10)
+            const newPassword = await bcrypt.hash(randomPassword, salt)
+            user = new User({
+                name,
+                email,
+                password: newPassword
+            })
+            await user.save()
+        }
+        //토큰만 발행
+        const sessionToken = await user.generateToken()
+        res.status(200).json({ status: "success", user, token: sessionToken })
+
+    } catch (err) {
+        res.status(400).json({ status: 'fail', error: err.message })
+    }
+}
+
+
 authController.authenticate = async (req, res, next) => {
     try {
         const tokenString = req.headers.authorization
@@ -39,14 +74,14 @@ authController.authenticate = async (req, res, next) => {
 }
 
 
-authController.checkAdminPermission = async(req, res, next) => {
-    try{
-        const {userId} = req
+authController.checkAdminPermission = async (req, res, next) => {
+    try {
+        const { userId } = req
         const user = await User.findById(userId)
-        if(user.level !== 'admin') throw new Error("no permission")
+        if (user.level !== 'admin') throw new Error("no permission")
         next()
-    }catch(err){
-        res.status(400).json({status : "fail", error : err.message})
+    } catch (err) {
+        res.status(400).json({ status: "fail", error: err.message })
     }
 }
 
